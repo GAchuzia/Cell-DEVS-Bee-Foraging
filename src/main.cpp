@@ -9,15 +9,15 @@
 int main() {
     using namespace cadmium;
     using namespace cadmium::celldevs;
-
-    auto model = std::make_shared<GridCellDEVSCoupled<nectarState, double>>("nectar", addGridCell, "config/initial_scenario.json");
+    
+    auto model = std::make_shared<NectarGrid>("nectar", "config/initial_scenario.json");
     
     model->buildModel(); 
 
     RootCoordinator rootCoordinator(model);
 
     // CSV Logger
-    rootCoordinator.setLogger<CSVLogger>("../simulation_results/simulation_output.csv", ";");
+    rootCoordinator.setLogger<CSVLogger>("simulation_results/simulation_output.csv", ";");
 
     // Run simulation
     rootCoordinator.start();
