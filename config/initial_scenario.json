@@ -1,0 +1,21 @@
+{
+  "scenario": {
+    "shape": [10, 10],
+    "origin": [0, 0],
+    "wrapped": false
+  },
+  "cells": {
+    "default": {
+      "delay": "inertial",
+      "model": "nectar",
+      "state": { "nectar": 10.0, "pollen": 5.0, "bees": 0 },
+      "neighborhood": [
+        { "type": "moore", "range": 1 }
+      ]
+    },
+    "high_activity_zone": {
+      "state": { "nectar": 50.0, "pollen": 20.0, "bees": 15 },
+      "cell_map": [ [4, 4], [4, 5], [5, 4], [5, 5] ]
+    }
+  }
+}
