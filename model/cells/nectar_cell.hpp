@@ -23,25 +23,45 @@ public:
         
         nectarState newState = state;
         
-        // Rates for nectar
-        double regrowth_rate = 0.5;
-        double decay_rate = 0.05;
-        double consumption_rate = 0.2;
+        // Ecosystem parameters
+        double nectar_regrowth = 1.0;
+        double pollen_regrowth = 1.0;
+        double nectar_decay = 0.05;
+        double pollen_decay = 0.05;
+
+        // Consumption per bee
+        double nectar_consumption = 0.3;
+        double pollen_consumption = 0.1;
+
+        // Carrying capacity per cell
+        double max_nectar = 100.0;
+        double max_pollen = 50.0;
+        //TODO: max num of bees
 
         int incoming_bees = 0;
         for (const auto& [neighborId, neighborData] : neighborhood) {
             incoming_bees += static_cast<int>(neighborData.state->bees * 0.25);
         }
-        newState.bees = incoming_bees;
+        // Keep half of local bees and add incoming bees
+        int new_bees = static_cast<int>(incoming_bees) + (state.bees / 2);
+
+
+        
+        newState.bees = new_bees;
 
         // Nectar dynamics
-        newState.nectar_lvl += regrowth_rate;
-        newState.nectar_lvl -= decay_rate * state.nectar_lvl;
-        newState.nectar_lvl -= consumption_rate * state.bees;
+        if (state.nectar_lvl < max_nectar) {
+            newState.nectar_lvl += nectar_regrowth;
+        }
+        newState.nectar_lvl -= nectar_decay * state.nectar_lvl;
+        newState.nectar_lvl -= nectar_consumption * newState.bees;
 
         // Pollen dynamics
-        newState.pollen_lvl += 0.3;
-        newState.pollen_lvl -= 0.1 * state.pollen_lvl;
+        if (state.pollen_lvl < max_pollen) {
+            newState.pollen_lvl += pollen_regrowth;
+        }
+        newState.pollen_lvl -= pollen_decay * state.pollen_lvl;
+        newState.pollen_lvl -= pollen_consumption * newState.bees;
 
         // Set negative to 0
         if (newState.nectar_lvl < 0) newState.nectar_lvl = 0;
