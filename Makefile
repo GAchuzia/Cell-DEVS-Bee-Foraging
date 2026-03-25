@@ -4,7 +4,7 @@ CXXFLAGS = -std=c++17 -O3 -g
 
 # Paths
 CADMIUM_PATH = /home/cadmium/rt_cadmium/include
-JSON_PATH = /home/Qureshi/libs
+JSON_PATH = /home/Achuzia/libs
 
 # Includes
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
