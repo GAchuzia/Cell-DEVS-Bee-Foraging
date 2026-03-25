@@ -1,6 +1,7 @@
 #ifndef NECTAR_CELL
 #define NECTAR_CELL
 
+#include <algorithm>
 #include <cmath>
 #include <nlohmann/json.hpp>
 #include <cadmium/modeling/celldevs/grid/cell.hpp>
@@ -36,18 +37,15 @@ public:
         // Carrying capacity per cell
         double max_nectar = 100.0;
         double max_pollen = 50.0;
-        //TODO: max num of bees
+        const int max_bees = 60;
 
         int incoming_bees = 0;
         for (const auto& [neighborId, neighborData] : neighborhood) {
             incoming_bees += static_cast<int>(neighborData.state->bees * 0.25);
         }
-        // Keep half of local bees and add incoming bees
-        int new_bees = static_cast<int>(incoming_bees) + (state.bees / 2);
-
-
-        
-        newState.bees = new_bees;
+        int new_bees = incoming_bees + (state.bees / 2);
+        newState.bees = static_cast<int>(
+            std::clamp(static_cast<long long>(new_bees), 0LL, static_cast<long long>(max_bees)));
 
         // Nectar dynamics
         if (state.nectar_lvl < max_nectar) {
@@ -63,9 +61,8 @@ public:
         newState.pollen_lvl -= pollen_decay * state.pollen_lvl;
         newState.pollen_lvl -= pollen_consumption * newState.bees;
 
-        // Set negative to 0
-        if (newState.nectar_lvl < 0) newState.nectar_lvl = 0;
-        if (newState.pollen_lvl < 0) newState.pollen_lvl = 0;
+        newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
+        newState.pollen_lvl = std::clamp(newState.pollen_lvl, 0.0, max_pollen);
 
         return newState;
     }
