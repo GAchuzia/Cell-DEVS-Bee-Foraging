@@ -10,14 +10,14 @@ int main() {
     using namespace cadmium;
     using namespace cadmium::celldevs;
     
-    auto model = std::make_shared<NectarGrid>("nectar", "config/initial_scenario.json");
+    auto model = std::make_shared<NectarGrid>("nectar", "config/nectarVisualization_config.json");
     
     model->buildModel(); 
 
     RootCoordinator rootCoordinator(model);
 
     // CSV Logger
-    rootCoordinator.setLogger<CSVLogger>("simulation_results/simulation_log.csv", ";");
+    rootCoordinator.setLogger<CSVLogger>("simulation_results/grid_log.csv", ";");
 
     // Run simulation
     rootCoordinator.start();
