@@ -17,5 +17,26 @@
       "state": { "nectar": 50.0, "pollen": 20.0, "bees": 15 },
       "cell_map": [ [4, 4], [4, 5], [5, 4], [5, 5] ]
     }
-  }
+  }, 
+  "viewer": [
+    {
+      "field": "nectar",
+      "notes": "Transition from yellow (low nectar) to deep green (high nectar)",
+      "colors": [[255, 255, 224], [34, 139, 34]],
+      "breaks": [0, 25, 60]
+    },
+    {
+      "field": "pollen",
+      "notes": "Transition from white to bright orange",
+      "colors": [[255, 255, 255], [255, 165, 0]],
+      "breaks": [0, 10, 30]
+    },
+    {
+      "field": "bees",
+      "notes": "Discrete colors: Black for 0 bees, Yellow for 1-5, Red for 5+",
+      "colors": [[0, 0, 0], [255, 255, 0], [255, 0, 0]],
+      "breaks": [0, 0.5, 5, 20]
+    }
+  ]
+
 }

@@ -17,7 +17,7 @@ int main() {
     RootCoordinator rootCoordinator(model);
 
     // CSV Logger
-    rootCoordinator.setLogger<CSVLogger>("simulation_results/simulation_output.csv", ";");
+    rootCoordinator.setLogger<CSVLogger>("simulation_results/simulation_log.csv", ";");
 
     // Run simulation
     rootCoordinator.start();
