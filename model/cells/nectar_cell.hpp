@@ -49,7 +49,7 @@ public:
 
         double current_resource = state.nectar_lvl + state.pollen_lvl;
 
-        // Departure logic (FIXED)
+        // Departure logic 
         int departing_bees = 0;
         bool resources_low = (state.nectar_lvl < 8.0 || state.pollen_lvl < 8.0);
         bool better_elsewhere = (best_neighbor_resource > current_resource * 1.5);
@@ -88,7 +88,7 @@ public:
         // Decay
         newState.nectar_lvl -= nectar_decay * state.nectar_lvl;
 
-        // Saturating consumption (better than linear)
+        // Saturating consumption 
         double nectar_used = (nectar_consumption * newState.bees * state.nectar_lvl)
                            / (1.0 + newState.bees);
 
