@@ -21,21 +21,42 @@
    "viewer": [
     {
       "field": "nectar",
-      "notes": "Low (Light Yellow) -> Medium (Green) -> High (Deep Green)",
-      "colors": [[255, 255, 224], [144, 238, 144], [34, 139, 34]],
-      "breaks": [0, 30, 70, 100]
+      "notes": "Smooth green gradient (low → high)",
+      "colors": [
+        [255, 255, 224],
+        [220, 245, 200],
+        [180, 230, 170],
+        [140, 210, 140],
+        [90, 180, 90],
+        [34, 139, 34]
+      ],
+      "breaks": [0, 10, 25, 40, 60, 80, 100]
     },
     {
       "field": "pollen",
-      "notes": "Transition from white to bright orange",
-      "colors": [[255, 255, 255], [255, 215, 0], [255, 140, 0]],
-      "breaks": [0, 15, 35, 50]
+      "notes": "White → yellow → deep orange gradient",
+      "colors": [
+        [255, 255, 255],
+        [255, 240, 200],
+        [255, 220, 120],
+        [255, 200, 60],
+        [255, 165, 0],
+        [255, 120, 0]
+      ],
+      "breaks": [0, 5, 10, 20, 30, 40, 50]
     },
     {
       "field": "bees",
-      "notes": "Black (None), Yellow (Few), Red (Many)",
-      "colors": [[0, 0, 0], [255, 255, 0], [255, 0, 0]],
-      "breaks": [0, 1, 10, 50]
+      "notes": "Black → yellow → orange → red gradient",
+      "colors": [
+        [0, 0, 0],
+        [120, 120, 0],
+        [200, 200, 0],
+        [255, 180, 0],
+        [255, 100, 0],
+        [255, 0, 0]
+      ],
+      "breaks": [0, 1, 5, 10, 20, 35, 50]
     }
   ]
 }
