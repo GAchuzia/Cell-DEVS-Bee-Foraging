@@ -1,0 +1,41 @@
+{
+  "scenario": {
+    "shape": [10, 10],
+    "origin": [0, 0],
+    "wrapped": false
+  },
+  "cells": {
+    "default": {
+      "delay": "inertial",
+      "model": "nectar",
+      "state": {
+        "nectar": 10.0,
+        "pollen": 5.0,
+        "bees": 0
+      },
+      "neighborhood": [
+        { "type": "von_neumann", "range": 1 }
+      ]
+    }
+  },
+  "viewer": [
+    {
+      "field": "nectar",
+      "notes": "Low (Light Yellow) -> Medium (Green) -> High (Deep Green)",
+      "colors": [[255, 255, 224], [144, 238, 144], [34, 139, 34]],
+      "breaks": [0, 30, 70, 100]
+    },
+    {
+      "field": "pollen",
+      "notes": "Transition from white to bright orange",
+      "colors": [[255, 255, 255], [255, 215, 0], [255, 140, 0]],
+      "breaks": [0, 15, 35, 50]
+    },
+    {
+      "field": "bees",
+      "notes": "Black (None), Yellow (Few), Red (Many)",
+      "colors": [[0, 0, 0], [255, 255, 0], [255, 0, 0]],
+      "breaks": [0, 1, 10, 50]
+    }
+  ]
+}
