@@ -2,19 +2,42 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
-# Paths
-CADMIUM_PATH = /home/cadmium/rt_cadmium/include
-JSON_PATH = /home/Achuzia/libs
+# Paths (override on the command line if needed, e.g. make CADMIUM_PATH=/path/to/cadmium/include)
+CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
+JSON_PATH ?= /home/Achuzia/libs
 
-# Includes
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 
-# Source files
 SRC = src/main.cpp
 TARGET = nectar
 
-all:
+.PHONY: all clean run tests test1 test2 test3 test4 results_dir
+
+all: $(TARGET)
+
+$(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) $(SRC) $(INCLUDES) -o $(TARGET)
+
+results_dir:
+	@mkdir -p simulation_results
 
 clean:
 	rm -f $(TARGET)
+
+# Default scenario: config/nectarVisualization_config.json -> simulation_results/grid_log.csv
+run: all results_dir
+	./$(TARGET)
+
+test1: all results_dir
+	./$(TARGET) config/tests/test1_no_bees.json simulation_results/grid_log_test1.csv
+
+test2: all results_dir
+	./$(TARGET) config/tests/test2_center_burst.json simulation_results/grid_log_test2.csv
+
+test3: all results_dir
+	./$(TARGET) config/tests/test3_corner_unwrapped.json simulation_results/grid_log_test3_unwrapped.csv
+
+test4: all results_dir
+	./$(TARGET) config/tests/test4_corner_wrapped.json simulation_results/grid_log_test4_wrapped.csv
+
+tests: test1 test2 test3 test4
