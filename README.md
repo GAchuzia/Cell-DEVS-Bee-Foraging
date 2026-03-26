@@ -26,7 +26,7 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
 | Path | Role |
 |------|------|
-| `src/main.cpp` | Builds `nectar`; optional `[config.json] [output_log.csv]` |
+| `src/main.cpp` | Builds `nectar` |
 | `model/nectar_grid.hpp` | Coupled Cell-DEVS grid |
 | `model/cells/nectar_cell.hpp` | Local transition \(\tau\) |
 | `model/cells/nectarState.hpp` | State struct and JSON parsing |
