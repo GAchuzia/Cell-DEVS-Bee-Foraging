@@ -31,8 +31,8 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 | `model/cells/nectar_cell.hpp` | Local transition \(\tau\) |
 | `model/cells/nectarState.hpp` | State struct and JSON parsing |
 | `config/nectarVisualization_config.json` | Default demo (center high-activity block) |
-| `config/tests/*_config.json` | Experimental-frame scenarios (tests 1–4) |
-| `simulation_results/` | CSV logs (and any `.webm` recordings you add locally) |
+| `config/tests/*_config.json` | Test scenarios (tests 1–4) |
+| `simulation_results/` | CSV logs and `.webm` recordings |
 
 ---
 
