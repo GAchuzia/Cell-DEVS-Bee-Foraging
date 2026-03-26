@@ -1,67 +1,82 @@
 # Cell-DEVS-Bee-Foraging
-A Cadmium simulation model of bee foraging
+
+Cadmium Cell-DEVS model of bee foraging on a 10×10 grid. 
+
+Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling uses a Von Neumann neighborhood.
 
 ---
 
-## FILES ORGANIZATION
+## Requirements
 
-**Makefile**  
-Build and run targets: `make all` (build both executables), `make simulation`, `make tests`, `make clean`.
+- C++17 compiler (`g++`)
+- [Cadmium](https://github.com/SimulationEverywhere/cadmium) headers on the include path
+- [nlohmann/json](https://github.com/nlohmann/json) on the include path (header-only). Example on Linux/macOS:
 
----
+  ```bash
+  mkdir -p ~/libs/nlohmann
+  cd ~/libs/nlohmann
+  wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
+  ```
 
-### **main/**  
-*Entry point and source for the full nectar model simulation.*
-
-- main.cpp
-
-
----
-
-### **model/**  
-
-- /cells/nectar_cell.hpp
-- /cells/nectar_state.hpp
-- nectar_grid.hpp
+  Then point `JSON_PATH` at the parent of `nlohmann` (e.g. `make JSON_PATH=$HOME/libs` so `#include <nlohmann/json.hpp>` resolves).
 
 ---
 
-### **tests/**  
-*Unit tests for atomic and coupled models.*
+## Layout
 
-- main.cpp
-- test.hpp
-
-### **tests/results/**  
-*Output files contianing the results of each atomic and coupled model test(s).*
-
----
-
-### **config/**  
-*Input data to run the model and the tests.*
-
-- initial_scenario.json
+| Path | Role |
+|------|------|
+| `src/main.cpp` | Builds `nectar`; optional `[config.json] [output_log.csv]` |
+| `model/nectar_grid.hpp` | Coupled Cell-DEVS grid |
+| `model/cells/nectar_cell.hpp` | Local transition \(\tau\) |
+| `model/cells/nectarState.hpp` | State struct and JSON parsing |
+| `config/nectarVisualization_config.json` | Default demo (center high-activity block) |
+| `config/tests/*_config.json` | Experimental-frame scenarios (tests 1–4) |
+| `simulation_results/` | CSV logs (and any `.webm` recordings you add locally) |
 
 ---
 
-### **simulation_results/**  
-*Created automatically the first time you run the simulation. It stores the outputs from your simulations and tests.*
+## Build
+
+From the repository root (adjust paths for your machine):
+
+```bash
+make
+# Optional overrides:
+# make CADMIUM_PATH=/path/to/cadmium/include JSON_PATH=/path/to/json/include
+```
+
+Produces the `nectar` executable.
 
 ---
 
-### **docs/**  
-*Assignment and model form documentation.*
+## Run
 
-### **.github/workflows/**  
-*CI configuration (e.g. release.yml).*
+```bash
+mkdir -p simulation_results
+
+# Defaults: config/nectarVisualization_config.json and simulation_results/grid_log.csv
+./nectar
+
+# Explicit paths:
+./nectar config/tests/test1_no_bees_config.json simulation_results/test1_grid_log.csv
+```
+
+The simulation horizon is **50** time units.
 
 ---
 
-## STEPS
+## Make targets
 
-### **0 – Model documentation**  
-The **docs/** folder contains the explanation of this model (e.g. assignment and model form docs).
+| Target | Config | Log output / effect |
+|--------|--------|---------------------|
+| `make`  | — | Compiles `./nectar` |
+| `make clean` | — | Removes the `nectar` binary only (does not delete CSV logs under `simulation_results/`) |
+| `make run` | `config/nectarVisualization_config.json` | `simulation_results/grid_log.csv` |
+| `make test1` | `config/tests/test1_no_bees_config.json` | `simulation_results/test1_grid_log.csv` |
+| `make test2` | `config/tests/test2_center_burst_config.json` | `simulation_results/test2_grid_log.csv` |
+| `make test3` | `config/tests/test3_corner_unwrapped_config.json` | `simulation_results/test3_unwrapped_grid_log.csv` |
+| `make test4` | `config/tests/test4_corner_wrapped_config.json` | `simulation_results/test4_wrapped_grid_log.csv` |
+| `make tests` | runs `test1`–`test4` in order | — |
 
-### **1 - Run the simulaton**
-```make```
-```./nectar```
+
