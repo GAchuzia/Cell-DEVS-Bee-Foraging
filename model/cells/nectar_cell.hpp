@@ -55,7 +55,7 @@ public:
         bool better_elsewhere = (best_neighbor_resource > current_resource * 1.5);
 
         if (resources_low) {
-            departing_bees = static_cast<int>(state.bees * 0.4); // stronger exit
+            departing_bees = static_cast<int>(state.bees * 0.4);
         } else if (better_elsewhere) {
             departing_bees = state.bees / 2;
         }
@@ -80,7 +80,7 @@ public:
 
         // nectar dynamics 
 
-        // Regrowth depends on pollen (important for report)
+        // Nectar regrowth depends on pollen
         if (state.nectar_lvl < max_nectar) {
             newState.nectar_lvl += nectar_regrowth * (1.0 + 0.01 * state.pollen_lvl);
         }
@@ -96,8 +96,6 @@ public:
 
         // Clamp nectar
         newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
-
-        // pollen dynamics 
 
         // Incoming pollen from neighbors
         double pollen_in = 0.0;
