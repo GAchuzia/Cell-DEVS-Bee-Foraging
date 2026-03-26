@@ -53,8 +53,6 @@ Produces the `nectar` executable.
 ## Run
 
 ```bash
-mkdir -p simulation_results
-
 # Defaults: config/nectarVisualization_config.json and simulation_results/grid_log.csv
 ./nectar
 
