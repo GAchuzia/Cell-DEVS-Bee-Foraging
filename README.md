@@ -10,7 +10,7 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
 - C++17 compiler (`g++`)
 - [Cadmium](https://github.com/SimulationEverywhere/cadmium) headers on the include path
-- [nlohmann/json](https://github.com/nlohmann/json) on the include path (header-only). Example on Linux/macOS:
+- [nlohmann/json](https://github.com/nlohmann/json) on the include path. Example on Linux/macOS:
 
   ```bash
   mkdir -p ~/libs/nlohmann
@@ -70,13 +70,13 @@ The simulation horizon is **50** time units.
 
 | Target | Config | Log output / effect |
 |--------|--------|---------------------|
-| `make`  | — | Compiles `./nectar` |
+| `make`  | N/A | Compiles `./nectar` |
 | `make clean` | — | Removes the `nectar` binary only (does not delete CSV logs under `simulation_results/`) |
 | `make run` | `config/nectarVisualization_config.json` | `simulation_results/grid_log.csv` |
 | `make test1` | `config/tests/test1_no_bees_config.json` | `simulation_results/test1_grid_log.csv` |
 | `make test2` | `config/tests/test2_center_burst_config.json` | `simulation_results/test2_grid_log.csv` |
 | `make test3` | `config/tests/test3_corner_unwrapped_config.json` | `simulation_results/test3_unwrapped_grid_log.csv` |
 | `make test4` | `config/tests/test4_corner_wrapped_config.json` | `simulation_results/test4_wrapped_grid_log.csv` |
-| `make tests` | runs `test1`–`test4` in order | — |
+| `make tests` | runs `test1`–`test4` in order | N/A |
 
 
