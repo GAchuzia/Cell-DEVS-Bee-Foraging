@@ -4,7 +4,6 @@ Cadmium Cell-DEVS model of bee foraging on a 10×10 grid.
 
 Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling uses a Von Neumann neighborhood.
 
----
 
 ## Requirements
 
@@ -20,8 +19,6 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
   Then point `JSON_PATH` at the parent of `nlohmann` (e.g. `make JSON_PATH=$HOME/libs` so `#include <nlohmann/json.hpp>` resolves).
 
----
-
 ## Layout
 
 | Path | Role |
@@ -33,8 +30,6 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 | `config/nectarVisualization_config.json` | Default demo (center high-activity block) |
 | `config/tests/*_config.json` | Test scenarios (tests 1–4) |
 | `simulation_results/` | CSV logs and `.webm` recordings |
-
----
 
 ## Build
 
@@ -48,8 +43,6 @@ make
 
 Produces the `nectar` executable.
 
----
-
 ## Run
 
 ```bash
@@ -61,7 +54,6 @@ Produces the `nectar` executable.
 ```
 
 The simulation horizon is **50** time units.
-
 
 ## Make targets
 
