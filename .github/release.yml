@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set tag name
+        id: tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create source archive
+        run: |
+          zip -r cadmium-mitosis-${{ steps.tag.outputs.TAG_NAME }}.zip . \
+            -x "*.git*" \
+            -x ".github/*" \
+            -x "simulation" \
+            -x "run_tests" \
+            -x "*.o"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG_NAME }}
+          name: ${{ steps.tag.outputs.TAG_NAME }}
+          body: |
+            Cadmium Mitosis DEVS model — source release.
+            Build with `make` or `./build_sim.sh` (see README.md).
+          files: cadmium-mitosis-${{ steps.tag.outputs.TAG_NAME }}.zip
+          draft: false
+          prerelease: false
+
+# Create a release: 
+# git tag v1.0.0 
+# git push origin v1.0.0
