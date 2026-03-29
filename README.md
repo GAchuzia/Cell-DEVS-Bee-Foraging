@@ -1,6 +1,6 @@
 # Cell-DEVS-Bee-Foraging
 
-Cadmium Cell-DEVS model of bee foraging on a 10×10 grid. 
+Cadmium Cell-DEVS model of bee foraging on a 10×10 grid.
 
 Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling uses a Von Neumann neighborhood.
 
@@ -62,7 +62,6 @@ Produces the `nectar` executable.
 
 The simulation horizon is **50** time units.
 
----
 
 ## Make targets
 
@@ -76,5 +75,3 @@ The simulation horizon is **50** time units.
 | `make test3` | `config/tests/test3_corner_unwrapped_config.json` | `simulation_results/test3_unwrapped_grid_log.csv` |
 | `make test4` | `config/tests/test4_corner_wrapped_config.json` | `simulation_results/test4_wrapped_grid_log.csv` |
 | `make tests` | runs `test1`–`test4` in order | N/A |
-
-
