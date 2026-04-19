@@ -3,25 +3,94 @@
 
 #include <cmath>
 #include <algorithm>
+#include <vector>
 #include <nlohmann/json.hpp>
+
+#include <cadmium/modeling/devs/port.hpp> 
 #include <cadmium/modeling/celldevs/grid/cell.hpp>
 #include <cadmium/modeling/celldevs/grid/config.hpp>
+
 #include "nectarState.hpp"
+
+struct BeeMovement {
+    int bee_id;
+    int x, y;
+    bool entering;
+    double consumption_request;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const BeeMovement& m) {
+    os << "{}";
+    // os << "{\"bee_id\":" << m.bee_id << ",\"entering\":" << (m.entering ? "true" : "false") << "}";
+    return os;
+}
 
 using namespace cadmium::celldevs;
 
-class NectarCell : public GridCell<nectarState, double> {
+class NectarCell : public cadmium::celldevs::GridCell<nectarState, double> {
 public:
+    cadmium::Port<BeeMovement> bee_port;
+
     // Constructor
-    NectarCell(const std::vector<int>& id,
-               const std::shared_ptr<const GridCellConfig<nectarState, double>>& config)
-    : GridCell<nectarState, double>(id, config) { }
+    NectarCell(const cadmium::celldevs::coordinates& id,
+               const std::shared_ptr<const cadmium::celldevs::GridCellConfig<nectarState, double>>& config)
+    : GridCell<nectarState, double>(id, config) { 
+        bee_port = addInPort<BeeMovement>("in_bee_event");
+    }
+
+
+    // External Transition
+    //  Triggered when bee sends a consumption request
+    void externalTransition(double e) override {
+        clock += e;
+        // sigma -= e;
+
+        bool beeChanged = false;
+
+        // process bee movements
+        for (auto const& beeMov : bee_port->getBag()) {
+        beeChanged = true; 
+        if(beeMov.entering) {
+            state.bees++;
+        } else {
+            state.bees = std::max(0, state.bees - 1);
+        }
+        
+        if(beeMov.consumption_request > 0) {
+            state.nectar_lvl -= beeMov.consumption_request;
+            state.pollen_lvl += (beeMov.consumption_request * 0.15);
+        }
+    }
+
+    // process neighborhood
+    for (const auto& msg : inputNeighborhood->getBag()) {
+        neighborhood.at(msg->cellId).state = msg->state;
+    }
+
+    // compute next state 
+    auto nextState = localComputation(state, neighborhood);
+    
+    state = nextState;
+    state.nectar_lvl = std::clamp(state.nectar_lvl, 0.0, 100.0);
+    state.pollen_lvl = std::clamp(state.pollen_lvl, 0.0, 50.0);
+
+    // trigger an output i state changed
+    if (beeChanged || nextState != state) {
+        sigma = 0; 
+    } else {
+        // Continue waiting 
+        // sigma = outputQueue->size() == 0 ? std::numeric_limits<double>::infinity() : outputQueue->nextTime() - clock;
+        sigma = outputQueue->nextTime() - clock;
+    }
+
+        
+    }
 
     // Local Computation
     [[nodiscard]] nectarState localComputation(
         nectarState state,
-        const std::unordered_map<std::vector<int>, NeighborData<nectarState, double>>& neighborhood
-    ) const override {
+        const std::unordered_map<coordinates, NeighborData<nectarState, double>>& neighborhood) 
+    const override {
 
         nectarState newState = state;
 
@@ -32,52 +101,10 @@ public:
         double pollen_regrowth = 1.0;
         double pollen_decay    = 0.05;
 
-        double pollen_per_bee_visit = 2.0;
-
         double max_nectar = 100.0;
         double max_pollen = 50.0;
         int    max_bees   = 50;
-
-        // bee movement
-
-        // Find best neighbor resource (nectar + pollen)
-        double best_neighbor_resource = 0.0;
-        for (const auto& [id, n] : neighborhood) {
-            double resource = n.state->nectar_lvl + n.state->pollen_lvl;
-            best_neighbor_resource = std::max(best_neighbor_resource, resource);
-        }
-
-        double current_resource = state.nectar_lvl + state.pollen_lvl;
-
-        // Departure logic 
-        int departing_bees = 0;
-        bool resources_low = (state.nectar_lvl < 8.0 || state.pollen_lvl < 8.0);
-        bool better_elsewhere = (best_neighbor_resource > current_resource * 1.5);
-
-        if (resources_low) {
-            departing_bees = static_cast<int>(state.bees * 0.4);
-        } else if (better_elsewhere) {
-            departing_bees = state.bees / 2;
-        }
-
-        // Incoming bees (biased by nectar difference)
-        int incoming_bees = 0;
-        for (const auto& [neighborId, neighborData] : neighborhood) {
-            if (neighborId[0] == 0 && neighborId[1] == 0) continue;
-
-            double nectar_diff = state.nectar_lvl - neighborData.state->nectar_lvl;
-
-            if (nectar_diff > 0) {
-                incoming_bees += static_cast<int>(
-                    neighborData.state->bees * (0.2 + 0.02 * nectar_diff)
-                );
-            }
-        }
-
-        // Update bee count with cap
-        int new_bees = (state.bees - departing_bees) + incoming_bees;
-        newState.bees = std::clamp(new_bees, 0, max_bees);
-
+        
         // nectar dynamics 
 
         // Nectar regrowth depends on pollen
@@ -88,32 +115,25 @@ public:
         // Decay
         newState.nectar_lvl -= nectar_decay * state.nectar_lvl;
 
-        // Saturating consumption 
-        double nectar_used = (nectar_consumption * newState.bees * state.nectar_lvl)
-                           / (1.0 + newState.bees);
-
-        newState.nectar_lvl -= nectar_used;
-
         // Clamp nectar
         newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
 
         // Incoming pollen from neighbors
-        double pollen_in = 0.0;
-        for (const auto& [neighborId, neighborData] : neighborhood) {
-            if (neighborId[0] == 0 && neighborId[1] == 0) continue;
+        // double pollen_in = 0.0;
+        // for (const auto& [neighborId, neighborData] : neighborhood) {
+        //     if (neighborId[0] == 0 && neighborId[1] == 0) continue;
+        //     pollen_in += neighborData.state->bees * pollen_per_bee_visit * 0.025;
+        // }
 
-            pollen_in += neighborData.state->bees * pollen_per_bee_visit * 0.025;
-        }
-
-        // Outgoing pollen due to departing bees
-        double pollen_out = departing_bees * pollen_per_bee_visit * 0.1;
+        // // Outgoing pollen due to departing bees
+        // double pollen_out = departing_bees * pollen_per_bee_visit * 0.1;
 
         // Update pollen
-        newState.pollen_lvl += pollen_in;
-        newState.pollen_lvl -= pollen_out;
+        // newState.pollen_lvl += pollen_in;
+        // newState.pollen_lvl -= pollen_out;
         newState.pollen_lvl -= pollen_decay * state.pollen_lvl;
 
-        // Optional mild regrowth (keep from original)
+        // Optional mild regrowth
         if (state.pollen_lvl < max_pollen) {
             newState.pollen_lvl += pollen_regrowth * 0.1;
         }

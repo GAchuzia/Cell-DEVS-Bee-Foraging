@@ -15,14 +15,30 @@ struct nectarState {
 
 
 inline std::ostream& operator<<(std::ostream& os, const nectarState& s) {
-    os << "<" << s.nectar_lvl << "," << s.pollen_lvl << "," << s.bees << ">";
+    os << "{\"nectar\":" << s.nectar_lvl
+       << ",\"pollen\":" << s.pollen_lvl
+       << ",\"bees\":" << s.bees << "}";
     return os;
+}
+
+inline bool operator==(const nectarState& a, const nectarState& b) {
+    return a.nectar_lvl == b.nectar_lvl &&
+           a.pollen_lvl == b.pollen_lvl &&
+           a.bees == b.bees;
 }
 
 inline bool operator!=(const nectarState& a, const nectarState& b) {
     return a.nectar_lvl != b.nectar_lvl ||
            a.pollen_lvl != b.pollen_lvl ||
            a.bees != b.bees;
+}
+
+inline void to_json(nlohmann::json& j, const nectarState& s) {
+    j = nlohmann::json{
+        {"nectar", s.nectar_lvl}, 
+        {"pollen", s.pollen_lvl}, 
+        {"bees", s.bees}
+    };
 }
 
 // Parses initial values from JSON config file
