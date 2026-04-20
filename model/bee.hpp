@@ -38,7 +38,7 @@ struct BeeState {
 // }
 
 inline std::ostream& operator<<(std::ostream& os, const BeeState& s) {
-    os << "{}"; 
+    os << "<0,0,0>"; 
     return os;
 }
 

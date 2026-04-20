@@ -15,7 +15,7 @@
     },
     "zone_2":{
       "state": { "nectar": 50.0, "pollen": 25.0, "bees": 0 },
-      "cell_map": [[4, 4]]
+      "cell_map": [[3, 3]]
     },
     "zone_1":{
       "state": { "nectar": 10.0, "pollen": 45.0, "bees": 0 },

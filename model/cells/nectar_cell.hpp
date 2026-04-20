@@ -20,7 +20,7 @@ struct BeeMovement {
 };
 
 inline std::ostream& operator<<(std::ostream& os, const BeeMovement& m) {
-    os << "{}";
+    os << "<0,0,0>";
     // os << "{\"bee_id\":" << m.bee_id << ",\"entering\":" << (m.entering ? "true" : "false") << "}";
     return os;
 }
