@@ -44,6 +44,6 @@ test5: all results_dir
 	./$(TARGET) config/tests/test5_multi_species_config.json simulation_results/test5_multi_species_grid_log.csv
 
 test5_viewer: test5
-	awk -F';' 'NR<=2 || $$3 ~ /^\([0-9]+,[0-9]+\)$$/ { print }' simulation_results/test5_multi_species_grid_log.csv > simulation_results/test5_multi_species_grid_log_viewer.csv
+	awk -F';' 'NR<=2 || ($$3 ~ /^\([0-9]+,[0-9]+\)$$/ && $$5 ~ /^<[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+>$$/) { print }' simulation_results/test5_multi_species_grid_log.csv > simulation_results/test5_multi_species_grid_log_viewer.csv
 
 tests: test1 test2 test3 test4 test5
