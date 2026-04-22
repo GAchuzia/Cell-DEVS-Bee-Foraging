@@ -2,16 +2,28 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
-# Paths (override on the command line if needed, e.g. make CADMIUM_PATH=/path/to/cadmium/include)
-CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
-JSON_PATH ?= /home/Qureshi/libs
+# Paths (override on the command line if needed):
+#   make CADMIUM_PATH=/path/to/cadmium/include JSON_PATH=/path/to/json/parent
+#
+# Defaults are intentionally user-agnostic. If dependencies are not on a system include
+# path, set CADMIUM_PATH and JSON_PATH when invoking make.
+CADMIUM_PATH ?=
+JSON_PATH ?=
 
-INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
+INCLUDES = -I./src
+
+ifneq ($(strip $(CADMIUM_PATH)),)
+INCLUDES += -I$(CADMIUM_PATH)
+endif
+
+ifneq ($(strip $(JSON_PATH)),)
+INCLUDES += -I$(JSON_PATH)
+endif
 
 SRC = src/main.cpp
 TARGET = nectar
 
-.PHONY: all clean run tests test1 test2 test3 test4 results_dir
+.PHONY: all clean run tests test1 test2 test3 test4 test5 results_dir
 
 all: $(TARGET)
 
@@ -40,4 +52,7 @@ test3: all results_dir
 test4: all results_dir
 	./$(TARGET) config/tests/test4_corner_wrapped_config.json simulation_results/test4_wrapped_grid_log.csv
 
-tests: test1 test2 test3 test4
+test5: all results_dir
+	./$(TARGET) config/tests/test5_multi_species_config.json simulation_results/test5_multi_species_grid_log.csv
+
+tests: test1 test2 test3 test4 test5
