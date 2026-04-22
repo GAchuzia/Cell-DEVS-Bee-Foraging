@@ -11,7 +11,7 @@ INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 SRC = src/main.cpp
 TARGET = nectar
 
-.PHONY: all clean run tests test1 test2 test3 test4 test5 results_dir
+.PHONY: all clean run tests test1 test2 test3 test4 test5 test5_viewer results_dir
 
 all: $(TARGET)
 
@@ -42,5 +42,8 @@ test4: all results_dir
 
 test5: all results_dir
 	./$(TARGET) config/tests/test5_multi_species_config.json simulation_results/test5_multi_species_grid_log.csv
+
+test5_viewer: test5
+	awk -F';' 'NR<=2 || $$3 ~ /^\([0-9]+,[0-9]+\)$$/ { print }' simulation_results/test5_multi_species_grid_log.csv > simulation_results/test5_multi_species_grid_log_viewer.csv
 
 tests: test1 test2 test3 test4 test5
