@@ -1,0 +1,149 @@
+{
+  "scenario": {
+    "shape": [10, 10],
+    "origin": [0, 0],
+    "wrapped": true
+  },
+  "cells": {
+    "default": {
+      "delay": "inertial",
+      "model": "nectar",
+      "state": {
+        "nectar": 15.0,
+        "pollen": 5.0,
+        "bees": 0,
+        "butterflies": 0,
+        "plant_species": 1,
+        "pollen_type": 0,
+        "conspecific_pollen": 0.0,
+        "heterospecific_pollen": 0.0
+      },
+      "neighborhood": [
+          { "type": "von_neumann", "range": 1 }
+      ]
+    },
+    "plant_a_hotspots": {
+      "state": {
+        "nectar": 45.0,
+        "pollen": 20.0,
+        "bees": 2,
+        "butterflies": 1,
+        "plant_species": 1,
+        "pollen_type": 1,
+        "conspecific_pollen": 2.0,
+        "heterospecific_pollen": 0.0
+      },
+      "cell_map": [[1, 1], [2, 3], [4, 2], [3, 4]]
+    },
+    "plant_b_region": {
+      "state": {
+        "nectar": 20.0,
+        "pollen": 10.0,
+        "bees": 1,
+        "butterflies": 3,
+        "plant_species": 2,
+        "pollen_type": 2,
+        "conspecific_pollen": 1.0,
+        "heterospecific_pollen": 0.2
+      },
+      "cell_map": [
+        [0, 5], [0, 6], [0, 7], [0, 8], [0, 9],
+        [1, 5], [1, 6], [1, 7], [1, 8], [1, 9],
+        [2, 5], [2, 6], [2, 7], [2, 8], [2, 9],
+        [3, 5], [3, 6], [3, 7], [3, 8], [3, 9],
+        [4, 5], [4, 6], [4, 7], [4, 8], [4, 9],
+        [5, 5], [5, 6], [5, 7], [5, 8], [5, 9],
+        [6, 5], [6, 6], [6, 7], [6, 8], [6, 9],
+        [7, 5], [7, 6], [7, 7], [7, 8], [7, 9],
+        [8, 5], [8, 6], [8, 7], [8, 8], [8, 9],
+        [9, 5], [9, 6], [9, 7], [9, 8], [9, 9]
+      ]
+    }
+  },
+  "viewer": [
+    {
+      "field": "nectar",
+      "notes": "Smooth green gradient (low → high)",
+      "colors": [
+        [255, 255, 224],
+        [220, 245, 200],
+        [180, 230, 170],
+        [140, 210, 140],
+        [90, 180, 90],
+        [34, 139, 34]
+      ],
+      "breaks": [0, 10, 25, 40, 60, 80, 100]
+    },
+    {
+      "field": "pollen",
+      "notes": "White → yellow → deep orange gradient",
+      "colors": [
+        [255, 255, 255],
+        [255, 240, 200],
+        [255, 220, 120],
+        [255, 200, 60],
+        [255, 165, 0],
+        [255, 120, 0]
+      ],
+      "breaks": [0, 5, 10, 20, 30, 40, 50]
+    },
+    {
+      "field": "bees",
+      "notes": "Black → yellow → orange → red gradient",
+      "colors": [
+        [0, 0, 0],
+        [120, 120, 0],
+        [200, 200, 0],
+        [255, 180, 0],
+        [255, 100, 0],
+        [255, 0, 0]
+      ],
+      "breaks": [0, 0.1, 3, 8, 15, 25, 50]
+    },
+    {
+      "field": "butterflies",
+      "notes": "Purple gradient for butterfly density",
+      "colors": [
+        [245, 235, 255],
+        [220, 190, 255],
+        [190, 145, 255],
+        [155, 100, 235],
+        [120, 60, 200],
+        [80, 30, 150]
+      ],
+      "breaks": [0, 0.1, 3, 8, 15, 25, 50]
+    },
+    {
+      "field": "plant_species",
+      "notes": "Species map (A vs B)",
+      "colors": [
+        [180, 240, 180],
+        [30, 160, 30],
+        [120, 120, 255]
+      ],
+      "breaks": [0, 1, 2, 3]
+    },
+    {
+      "field": "pollen_type",
+      "notes": "Current pollen identity in each cell",
+      "colors": [
+        [220, 220, 220],
+        [255, 214, 102],
+        [153, 204, 255]
+      ],
+      "breaks": [0, 1, 2, 3]
+    },
+    {
+      "field": "heterospecific_pollen",
+      "notes": "Cumulative incompatible pollen deposition",
+      "colors": [
+        [245, 245, 245],
+        [255, 220, 180],
+        [255, 170, 120],
+        [255, 120, 80],
+        [220, 70, 40]
+      ],
+      "breaks": [0, 1, 3, 6, 10, 20]
+    }
+  ]
+}
