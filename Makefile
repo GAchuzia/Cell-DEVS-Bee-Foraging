@@ -2,23 +2,11 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
-# Paths (override on the command line if needed):
-#   make CADMIUM_PATH=/path/to/cadmium/include JSON_PATH=/path/to/json/parent
-#
-# Defaults are intentionally user-agnostic. If dependencies are not on a system include
-# path, set CADMIUM_PATH and JSON_PATH when invoking make.
-CADMIUM_PATH ?=
-JSON_PATH ?=
+# Paths (override on the command line if needed, e.g. make CADMIUM_PATH=/path/to/cadmium/include)
+CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
+JSON_PATH ?= /home/Qureshi/libs
 
-INCLUDES = -I./src
-
-ifneq ($(strip $(CADMIUM_PATH)),)
-INCLUDES += -I$(CADMIUM_PATH)
-endif
-
-ifneq ($(strip $(JSON_PATH)),)
-INCLUDES += -I$(JSON_PATH)
-endif
+INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 
 SRC = src/main.cpp
 TARGET = nectar
