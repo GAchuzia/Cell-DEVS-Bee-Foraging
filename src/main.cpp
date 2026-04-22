@@ -10,6 +10,7 @@
 #include "../model/nectar_grid.hpp"
 #include "../model/cells/nectar_cell.hpp"
 #include "../model/bee.hpp"
+#include "../model/butterfly.hpp"
 
 using namespace cadmium;
 
@@ -22,12 +23,18 @@ public:
         // Create bee starting at position (4,4)
         std::vector<int> startPos = {4, 4};
         auto bee1 = std::make_shared<Bee>(1, Role::FORAGER, startPos);
+        auto bee2 = std::make_shared<Bee>(2, Role::SCOUT, std::vector<int>{2, 2});
+        auto butterfly1 = std::make_shared<Butterfly>(1, std::vector<int>{7, 7});
 
         this->addComponent(grid);
         this->addComponent(bee1);
+        this->addComponent(bee2);
+        this->addComponent(butterfly1);
 
         // Connect bee output to grid input port
         this->addIC(bee1->getId(), "out", grid->getId(), "in_bee_move");
+        this->addIC(bee2->getId(), "out", grid->getId(), "in_bee_move");
+        this->addIC(butterfly1->getId(), "out", grid->getId(), "in_butterfly_move");
     }
 
 };

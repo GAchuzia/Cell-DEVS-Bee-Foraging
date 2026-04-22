@@ -14,11 +14,13 @@ using namespace cadmium::celldevs;
 class NectarGrid : public GridCellDEVSCoupled<nectarState, double> {
 public:
     cadmium::Port<BeeMovement> in_bee_move;
+    cadmium::Port<ButterflyMovement> in_butterfly_move;
     
     NectarGrid(std::string const &id, std::string const &configPath) 
         : GridCellDEVSCoupled<nectarState, double>(id, addNectarCell, configPath) {
 
         in_bee_move = addInPort<BeeMovement>("in_bee_move");
+        in_butterfly_move = addInPort<ButterflyMovement>("in_butterfly_move");
 
         std::ifstream file(configPath);
         if (!file.is_open()) {
@@ -39,6 +41,7 @@ public:
 
                 try {
                     this->addDynamicEIC("in_bee_move", cellIdStr, "in_bee_event");
+                    this->addDynamicEIC("in_butterfly_move", cellIdStr, "in_butterfly_event");
                 } catch (const cadmium::CadmiumModelException& e) {
                     std::cout << "Failed to link cell: " << cellIdStr << " - " << e.what() << std::endl;
                 }

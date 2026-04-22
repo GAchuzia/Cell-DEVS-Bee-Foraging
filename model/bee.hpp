@@ -111,6 +111,7 @@ public:
             msg.y = state.position[1];
             msg.entering = true;
             msg.consumption_request = state.consumption_rate;
+            msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
             out->addMessage(msg);
         }
     }
