@@ -2,25 +2,26 @@ import json
 
 SIZE = 10
 
-def is_river(x, y):
-    if x == 4 and y % 2 == 0:
-        return True
-    if x == 5 and y % 2 == 1:
-        return True
-    return False
-
-def neighbors(x, y):
+def all_neighbors(x, y):
     return [
-        (x-1, y),
-        (x+1, y),
-        (x, y-1),
-        (x, y+1),
+        (x - 1, y),
+        (x + 1, y),
+        (x, y - 1),
+        (x, y + 1),
         (x, y)  # self
     ]
 
+def crosses_half_river(x, y, nx, ny):
+    # Block only vertical crossings between row 4 and row 5
+    # for columns x = 0..4
+    if x != nx:
+        return False
+    if x < 0 or x > 4:
+        return False
+    return {y, ny} == {4, 5}
+
 cells = {}
 
-# Default config (IMPORTANT: add dummy neighborhood for viewer compatibility)
 cells["default"] = {
     "delay": "inertial",
     "model": "nectar",
@@ -34,29 +35,22 @@ cells["default"] = {
         "conspecific_pollen": 0.0,
         "heterospecific_pollen": 0.0
     },
-
-    # 🔥 THIS LINE FIXES EVERYTHING
     "neighborhood": [
         { "type": "von_neumann", "range": 1 }
     ]
 }
 
-# Generate asymmetric neighborhoods
 for x in range(SIZE):
     for y in range(SIZE):
         cell_id = f"({x},{y})"
         cell_neighbors = {}
 
-        for nx, ny in neighbors(x, y):
+        for nx, ny in all_neighbors(x, y):
             if 0 <= nx < SIZE and 0 <= ny < SIZE:
-
-                if is_river(x, y) != is_river(nx, ny):
-                    weight = 0.0
-                else:
-                    weight = 1.0
-
+                if crosses_half_river(x, y, nx, ny):
+                    continue
                 neighbor_id = f"({nx},{ny})"
-                cell_neighbors[neighbor_id] = weight
+                cell_neighbors[neighbor_id] = 1.0
 
         cells[cell_id] = {
             "neighborhood": cell_neighbors
@@ -69,28 +63,43 @@ config = {
         "wrapped": False
     },
     "cells": cells,
-
-    # 👇 THIS ALSO HELPS VIEWER
     "viewer": [
         {
             "field": "nectar",
-            "colors": [[255,255,224],[34,139,34]],
-            "breaks": [0, 100]
+            "colors": [
+                [255, 255, 224],
+                [220, 245, 200],
+                [180, 230, 170],
+                [120, 200, 120],
+                [34, 139, 34]
+            ],
+            "breaks": [0, 5, 10, 15, 20, 25]
         },
         {
             "field": "pollen",
-            "colors": [[255,255,255],[255,165,0]],
-            "breaks": [0, 50]
+            "colors": [
+                [255, 255, 255],
+                [255, 235, 180],
+                [255, 200, 90],
+                [255, 165, 0],
+                [220, 110, 0]
+            ],
+            "breaks": [0, 1, 2, 4, 6, 10]
         },
         {
-            "field": "bees",
-            "colors": [[0,0,0],[255,0,0]],
-            "breaks": [0, 50]
+            "field": "butterflies",
+            "colors": [
+                [0, 0, 0],
+                [80, 0, 120],
+                [140, 0, 200],
+                [220, 80, 255]
+            ],
+            "breaks": [0, 1, 2, 3, 5]
         }
     ]
 }
 
-with open("test6_water_barrier_config.json", "w") as f:
+with open("config/tests/test6_water_barrier_config.json", "w") as f:
     json.dump(config, f, indent=2)
 
-print("✅ Fixed test6 config generated!")
+print("Generated config/tests/test6_water_barrier_config.json")

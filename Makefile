@@ -9,13 +9,15 @@ JSON_PATH ?= /home/Lovett/libs
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 
 SRC = src/main.cpp
+HEADERS = model/nectar_grid.hpp model/bee.hpp model/butterfly.hpp model/cells/nectar_cell.hpp model/cells/nectarState.hpp
 TARGET = nectar
+
 
 .PHONY: all clean run tests test1 test2 test3 test4 test5 test5_viewer results_dir
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+$(TARGET): $(SRC) $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(SRC) $(INCLUDES) -o $(TARGET)
 
 results_dir:
@@ -46,10 +48,10 @@ run: all results_dir
 # test5_viewer: test5
 # 	awk -F';' 'NR<=2 || ($$3 ~ /^\([0-9]+,[0-9]+\)$$/ && $$5 ~ /^<[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+>$$/) { print }' simulation_results/test5_multi_species_grid_log.csv > simulation_results/test5_multi_species_grid_log_viewer.csv
 
-test6:
+test6: all results_dir
 	./$(TARGET) config/tests/test6_water_barrier_config.json simulation_results/test6_multi_species_grid_log.csv
 
 test6_viewer: test6
-	awk -F';' 'NR<=2 || ($$3 ~ /^\([0-9]+,[0-9]+\)$$/ && $$5 ~ /^<[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+>$$/) { print }' simulation_results/test6_multi_species_grid_log.csv > simulation_results/test6_multi_species_grid_log_viewer.csv
+	awk -F';' 'NR<=2 { next } $$4=="" { key=$$1 FS $$3; row[key]=$$0; if (!(key in seen)) { order[++n]=key; seen[key]=1 } } END { print "sep=;"; print "time;model_id;model_name;port_name;data"; for (i=1; i<=n; i++) print row[order[i]] }' simulation_results/test6_multi_species_grid_log.csv > simulation_results/test6_multi_species_grid_log_viewer.csv
 
 tests: test1 test2 test3 test4 test5

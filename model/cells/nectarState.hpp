@@ -28,8 +28,8 @@ struct nectarState {
 
 
 inline std::ostream& operator<<(std::ostream& os, const nectarState& s) {
-    os << "<" << s.nectar_lvl << "," << s.pollen_lvl << "," << s.bees << ","
-       << s.butterflies << "," << s.plant_species << "," << s.pollen_type
+    os << "<" << s.nectar_lvl << "," << s.pollen_lvl << "," << s.butterflies << ","
+       << s.bees << "," << s.plant_species << "," << s.pollen_type
        << "," << s.conspecific_pollen << "," << s.heterospecific_pollen << ">";
     return os;
 }

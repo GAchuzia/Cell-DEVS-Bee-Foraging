@@ -53,19 +53,19 @@ public:
         butterfly_port = addInPort<ButterflyMovement>("in_butterfly_event");
     }
 
+        [[nodiscard]] nectarState localComputation(
+        nectarState state,
+        const std::unordered_map<std::string, NeighborData<nectarState, double>>& neighborhood
+    ) const override {
 
-    // External Transition
-    //  Triggered when bee sends a consumption request
-    void externalTransition(double e) override {
-        clock += e;
-        sigma -= e;
+        const std::string currentCellId = this->getId();
 
-        bool beeChanged = false;
-        bool butterflyChanged = false;
-        bool pollinationEvent = false;
+        for (const auto& beeMov : bee_port->getBag()) {
+            const std::string targetCellId =
+                "(" + std::to_string(beeMov.x) + "," + std::to_string(beeMov.y) + ")";
 
-        for (auto const& beeMov : bee_port->getBag()) {
-            beeChanged = true;
+            if (targetCellId != currentCellId) continue;
+
             if (beeMov.entering) {
                 state.bees++;
             } else {
@@ -74,11 +74,10 @@ public:
 
             if (beeMov.consumption_request > 0) {
                 state.nectar_lvl -= beeMov.consumption_request;
-                state.pollen_lvl += (beeMov.consumption_request * 0.12);
+                state.pollen_lvl += beeMov.consumption_request * 0.12;
             }
 
             if (beeMov.pollen_type > 0) {
-                pollinationEvent = true;
                 state.pollen_type = beeMov.pollen_type;
                 if (beeMov.pollen_type == state.plant_species) {
                     state.conspecific_pollen += beeMov.consumption_request;
@@ -88,8 +87,12 @@ public:
             }
         }
 
-        for (auto const& butterflyMov : butterfly_port->getBag()) {
-            butterflyChanged = true;
+        for (const auto& butterflyMov : butterfly_port->getBag()) {
+            const std::string targetCellId =
+                "(" + std::to_string(butterflyMov.x) + "," + std::to_string(butterflyMov.y) + ")";
+
+            if (targetCellId != currentCellId) continue;
+
             if (butterflyMov.entering) {
                 state.butterflies++;
             } else {
@@ -98,12 +101,10 @@ public:
 
             if (butterflyMov.consumption_request > 0) {
                 state.nectar_lvl -= butterflyMov.consumption_request;
-                // Less efficient carrier: more wasted pollen delivery.
-                state.pollen_lvl += (butterflyMov.consumption_request * 0.28);
+                state.pollen_lvl += butterflyMov.consumption_request * 0.28;
             }
 
             if (butterflyMov.pollen_type > 0) {
-                pollinationEvent = true;
                 state.pollen_type = butterflyMov.pollen_type;
                 if (butterflyMov.pollen_type == state.plant_species) {
                     state.conspecific_pollen += butterflyMov.consumption_request * 0.7;
@@ -113,9 +114,9 @@ public:
             }
         }
 
-        // competition-inspired movement as counts (parallel to hybrid agents)
         double bestNeighborNectar = state.nectar_lvl;
         double bestNeighborResource = state.nectar_lvl + state.pollen_lvl;
+
         for (const auto& [neighborId, neighborData] : neighborhood) {
             bestNeighborNectar = std::max(
                 bestNeighborNectar,
@@ -139,46 +140,19 @@ public:
             state.butterflies = std::max(0, state.butterflies - movingButterflies);
         }
 
-        // compute next state
-        auto nextState = localComputation(state, neighborhood);
-    
-        auto oldState = state;
-        state = nextState;
-        state.nectar_lvl = std::clamp(state.nectar_lvl, 0.0, 100.0);
-        state.pollen_lvl = std::clamp(state.pollen_lvl, 0.0, 50.0);
-        state.bees = std::clamp(state.bees, 0, 50);
-        state.butterflies = std::clamp(state.butterflies, 0, 60);
-        state.conspecific_pollen = std::clamp(state.conspecific_pollen, 0.0, 1000.0);
-        state.heterospecific_pollen = std::clamp(state.heterospecific_pollen, 0.0, 1000.0);
-
-        if (beeChanged || butterflyChanged || pollinationEvent || oldState != state) {
-            sigma = 0;
-        } else {
-            sigma = outputQueue->nextTime() - clock;
-        }
-
-    }
-
-    // Local Computation
-    [[nodiscard]] nectarState localComputation(
-    nectarState state,
-    const std::unordered_map<std::string, NeighborData<nectarState, double>>& neighborhood
-    ) const override {
-
         nectarState newState = state;
 
         double nectar_regrowth = 1.0;
-        double nectar_decay    = 0.05;
+        double nectar_decay = 0.05;
         double nectar_consumption = 0.24;
         double butterfly_consumption = 0.36;
 
         double pollen_regrowth = 1.0;
-        double pollen_decay    = 0.05;
+        double pollen_decay = 0.05;
 
         double max_nectar = 100.0;
         double max_pollen = 50.0;
-        int    max_bees   = 50;
-        
+
         double nectar_regen_boost = 0.0;
         if (state.pollen_type == state.plant_species && state.plant_species != 0) {
             nectar_regen_boost = state.pollen_lvl * 0.02;
@@ -191,24 +165,27 @@ public:
         newState.nectar_lvl -= nectar_decay * state.nectar_lvl;
         newState.nectar_lvl -= nectar_consumption * state.bees;
         newState.nectar_lvl -= butterfly_consumption * state.butterflies;
-
         newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
 
         newState.pollen_lvl -= pollen_decay * state.pollen_lvl;
-
         if (state.pollen_lvl < max_pollen) {
             newState.pollen_lvl += pollen_regrowth * 0.1;
         }
-
         newState.pollen_lvl = std::clamp(newState.pollen_lvl, 0.0, max_pollen);
 
-        // Light pollen type decay to emulate washout after visits.
+        newState.bees = std::clamp(newState.bees, 0, 50);
+        newState.butterflies = std::clamp(newState.butterflies, 0, 60);
+        newState.conspecific_pollen = std::clamp(newState.conspecific_pollen, 0.0, 1000.0);
+        newState.heterospecific_pollen = std::clamp(newState.heterospecific_pollen, 0.0, 1000.0);
+
         if (newState.pollen_lvl < 0.2) {
             newState.pollen_type = 0;
         }
 
         return newState;
     }
+
+
 
     // Output delay
     [[nodiscard]] double outputDelay(const nectarState& state) const override {
