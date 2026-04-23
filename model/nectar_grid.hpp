@@ -5,19 +5,19 @@
 #include <fstream>
 
 #include <cadmium/modeling/devs/port.hpp> 
-#include <cadmium/modeling/celldevs/grid/coupled.hpp>
+#include <cadmium/modeling/celldevs/asymm/coupled.hpp>
 #include "cells/nectar_cell.hpp"
 
 using namespace cadmium;
 using namespace cadmium::celldevs;
 
-class NectarGrid : public GridCellDEVSCoupled<nectarState, double> {
+class NectarGrid : public AsymmCellDEVSCoupled<nectarState, double> {
 public:
     cadmium::Port<BeeMovement> in_bee_move;
     cadmium::Port<ButterflyMovement> in_butterfly_move;
     
     NectarGrid(std::string const &id, std::string const &configPath) 
-        : GridCellDEVSCoupled<nectarState, double>(id, addNectarCell, configPath) {
+        : AsymmCellDEVSCoupled<nectarState, double>(id, addNectarCell, configPath) {
 
         in_bee_move = addInPort<BeeMovement>("in_bee_move");
         in_butterfly_move = addInPort<ButterflyMovement>("in_butterfly_move");
@@ -29,15 +29,14 @@ public:
         nlohmann::json j;
         file >> j;
 
-        this->GridCellDEVSCoupled<nectarState, double>::buildModel();
+        this->AsymmCellDEVSCoupled<nectarState, double>::buildModel();
 
         auto grid_shape = j["scenario"]["shape"].get<std::vector<int>>();
 
         // Route the grid's input port to each individual cell's input port
         for (int i = 0; i < grid_shape[0]; ++i) {
             for (int j_idx = 0; j_idx < grid_shape[1]; ++j_idx) {
-                cadmium::celldevs::coordinates coord = {i, j_idx};
-                std::string cellIdStr = GridCellDEVSCoupled<nectarState, double>::cellId(coord);
+                std::string cellIdStr = "(" + std::to_string(i) + "," + std::to_string(j_idx) + ")";
 
                 try {
                     this->addDynamicEIC("in_bee_move", cellIdStr, "in_bee_event");
@@ -58,12 +57,12 @@ public:
     }
 
 private:
-    static std::shared_ptr<GridCell<nectarState, double>> addNectarCell(
-        const coordinates &cellId, 
-        const std::shared_ptr<const GridCellConfig<nectarState, double>>& cellConfig) 
+    static std::shared_ptr<AsymmCell<nectarState, double>> addNectarCell(
+        const std::string& id,
+        const std::shared_ptr<const AsymmCellConfig<nectarState, double>>& config)
     {
-        std::cout << "Registering Cell: " << cellId << std::endl;
-        return std::make_shared<NectarCell>(cellId, cellConfig);
+        std::cout << "Registering Cell: " << id << std::endl;
+        return std::make_shared<NectarCell>(id, config);    
     }
 };
 

@@ -7,8 +7,8 @@
 #include <nlohmann/json.hpp>
 
 #include <cadmium/modeling/devs/port.hpp> 
-#include <cadmium/modeling/celldevs/grid/cell.hpp>
-#include <cadmium/modeling/celldevs/grid/config.hpp>
+#include <cadmium/modeling/celldevs/asymm/cell.hpp>
+#include <cadmium/modeling/celldevs/asymm/config.hpp>
 
 #include "nectarState.hpp"
 
@@ -40,15 +40,15 @@ inline std::ostream& operator<<(std::ostream& os, const ButterflyMovement& m) {
 
 using namespace cadmium::celldevs;
 
-class NectarCell : public cadmium::celldevs::GridCell<nectarState, double> {
+class NectarCell : public cadmium::celldevs::AsymmCell<nectarState, double> {
 public:
     cadmium::Port<BeeMovement> bee_port;
     cadmium::Port<ButterflyMovement> butterfly_port;
 
     // Constructor
-    NectarCell(const cadmium::celldevs::coordinates& id,
-               const std::shared_ptr<const cadmium::celldevs::GridCellConfig<nectarState, double>>& config)
-    : GridCell<nectarState, double>(id, config) { 
+    NectarCell(const std::string& id,
+           const std::shared_ptr<const AsymmCellConfig<nectarState, double>>& config)
+    : AsymmCell<nectarState, double>(id, config) {
         bee_port = addInPort<BeeMovement>("in_bee_event");
         butterfly_port = addInPort<ButterflyMovement>("in_butterfly_event");
     }
@@ -113,21 +113,20 @@ public:
             }
         }
 
-    // process neighborhood
-        for (const auto& msg : inputNeighborhood->getBag()) {
-            neighborhood.at(msg->cellId).state = msg->state;
-        }
-
         // competition-inspired movement as counts (parallel to hybrid agents)
         double bestNeighborNectar = state.nectar_lvl;
         double bestNeighborResource = state.nectar_lvl + state.pollen_lvl;
         for (const auto& [neighborId, neighborData] : neighborhood) {
-            if (neighborId[0] == 0 && neighborId[1] == 0) continue;
-            bestNeighborNectar = std::max(bestNeighborNectar, neighborData.state->nectar_lvl);
-            bestNeighborResource = std::max(
-                bestNeighborResource,
-                neighborData.state->nectar_lvl + neighborData.state->pollen_lvl
+            bestNeighborNectar = std::max(
+                bestNeighborNectar,
+                neighborData.state->nectar_lvl
             );
+
+            double weightedResource =
+                neighborData.vicinity *
+                (neighborData.state->nectar_lvl + neighborData.state->pollen_lvl);
+
+            bestNeighborResource = std::max(bestNeighborResource, weightedResource);
         }
 
         if (bestNeighborResource > (state.nectar_lvl + state.pollen_lvl) * 1.5) {
@@ -143,6 +142,7 @@ public:
         // compute next state
         auto nextState = localComputation(state, neighborhood);
     
+        auto oldState = state;
         state = nextState;
         state.nectar_lvl = std::clamp(state.nectar_lvl, 0.0, 100.0);
         state.pollen_lvl = std::clamp(state.pollen_lvl, 0.0, 50.0);
@@ -151,7 +151,7 @@ public:
         state.conspecific_pollen = std::clamp(state.conspecific_pollen, 0.0, 1000.0);
         state.heterospecific_pollen = std::clamp(state.heterospecific_pollen, 0.0, 1000.0);
 
-        if (beeChanged || butterflyChanged || pollinationEvent || nextState != state) {
+        if (beeChanged || butterflyChanged || pollinationEvent || oldState != state) {
             sigma = 0;
         } else {
             sigma = outputQueue->nextTime() - clock;
@@ -161,9 +161,9 @@ public:
 
     // Local Computation
     [[nodiscard]] nectarState localComputation(
-        nectarState state,
-        const std::unordered_map<coordinates, NeighborData<nectarState, double>>& neighborhood) 
-    const override {
+    nectarState state,
+    const std::unordered_map<std::string, NeighborData<nectarState, double>>& neighborhood
+    ) const override {
 
         nectarState newState = state;
 

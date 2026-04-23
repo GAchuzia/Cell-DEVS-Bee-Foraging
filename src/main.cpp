@@ -1,6 +1,6 @@
 #include <cadmium/simulation/root_coordinator.hpp>
 #include <cadmium/simulation/logger/csv.hpp>
-#include <cadmium/modeling/celldevs/grid/coupled.hpp>
+#include <cadmium/modeling/celldevs/asymm/coupled.hpp>
 #include <cadmium/modeling/devs/coupled.hpp>
 
 #include <iostream>
