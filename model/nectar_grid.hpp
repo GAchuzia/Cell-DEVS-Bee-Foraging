@@ -49,11 +49,6 @@ public:
             }
         }
         std::cout << "Grid initialized with shape: " << grid_shape[0] << "x" << grid_shape[1] << std::endl;
-        std::cout << "DEBUG: Grid Ports registered: ";
-        for (auto const& p : this->getInPorts()) {
-            std::cout << p<< " ";
-        }
-        std::cout << std::endl;
             
     }
 
@@ -62,7 +57,6 @@ private:
         const coordinates &cellId, 
         const std::shared_ptr<const GridCellConfig<nectarState, double>>& cellConfig) 
     {
-        std::cout << "Registering Cell: " << cellId << std::endl;
         return std::make_shared<NectarCell>(cellId, cellConfig);
     }
 };

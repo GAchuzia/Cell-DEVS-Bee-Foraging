@@ -14,9 +14,11 @@ using namespace cadmium;
 struct ButterflyState {
     int id;
     std::vector<int> position;
+    std::vector<int> previous_position;
     double consumption_rate;
     double sigma;
     bool should_emit;
+    bool just_moved;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ButterflyState& s) {
@@ -43,9 +45,11 @@ public:
 
     void internalTransition(ButterflyState& state) const override {
         // Faster movers: emulate larger jump by moving two cells each internal transition.
+        state.previous_position = state.position;
         state.position[0] = (state.position[0] + 2) % 10;
         state.position[1] = (state.position[1] + 2) % 10;
         state.should_emit = true;
+        state.just_moved = true;
         state.sigma = 1.0;
     }
 
@@ -59,14 +63,27 @@ public:
 
     void output(const ButterflyState& state) const override {
         if (!state.should_emit) return;
-        ButterflyMovement msg;
-        msg.butterfly_id = state.id;
-        msg.x = state.position[0];
-        msg.y = state.position[1];
-        msg.entering = true;
-        msg.consumption_request = state.consumption_rate;
-        msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
-        out->addMessage(msg);
+
+        // Send leaving message to old cell
+        if (state.just_moved) {
+            ButterflyMovement exit_msg;
+            exit_msg.butterfly_id = state.id;
+            exit_msg.x = state.previous_position[0];
+            exit_msg.y = state.previous_position[1];
+            exit_msg.action = 0; // Leaving
+            exit_msg.consumption_request = 0.0;
+            exit_msg.pollen_type = 0;
+            out->addMessage(exit_msg);
+        }
+        // Send arriving/staying message to new cell
+        ButterflyMovement enter_msg;
+        enter_msg.butterfly_id = state.id;
+        enter_msg.x = state.position[0];
+        enter_msg.y = state.position[1];
+        enter_msg.action = state.just_moved ? 1 : 2; // Arriving if moved, otherwise staying
+        enter_msg.consumption_request = state.consumption_rate;
+        enter_msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
+        out->addMessage(enter_msg);
     }
 
     [[nodiscard]] double timeAdvance(const ButterflyState& state) const override {

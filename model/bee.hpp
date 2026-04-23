@@ -18,24 +18,14 @@ struct BeeState {
     int id;
     Role role;
     std::vector<int> position; // [x, y]
+    std::vector<int> prev_position; // [x, y]
     double consumption_rate; 
     double nectar_carried;
     double max_cap;
     double sigma;
-    bool sending_request; //flag to trigger output 
+    bool just_moved; //flag to trigger output 
     bool is_moving;
 };
-
-// inline std::ostream& operator<<(std::ostream& os, const BeeState& s) {
-//     os << "{"
-//        << "\"id\":" << s.id << ","
-//        << "\"role\":\"" << (s.role == Role::FORAGER ? "Forager" : (s.role == Role::SCOUT ? "Scout" : "Nurse")) << "\","
-//        << "\"pos\":[" << s.position[0] << "," << s.position[1] << "],"
-//        << "\"nectar_carried\":" << s.nectar_carried << ","
-//        << "\"is_moving\":" << (s.is_moving ? "true" : "false")
-//        << "}";
-//     return os;
-// }
 
 inline std::ostream& operator<<(std::ostream& os, const BeeState& s) {
     os << "<0,0,0>"; 
@@ -46,8 +36,7 @@ class Bee: public Atomic<BeeState> {
 public:
     Port<BeeMovement> out; // sends consumption & pollen request
     Port<double> in; // receives nectar levels from cell
-    Bee(int id, Role role, std::vector <int> pos) : Atomic<BeeState>("(" + std::to_string(pos[0]) + "," + std::to_string(pos[1]) + ")", BeeState()) {
- 
+    Bee(int id, Role role, std::vector <int> pos) : Atomic<BeeState>("bee_" + std::tro_string(id), BeeState()) {
         
         // initialize ports
         out = addOutPort<BeeMovement>("out");
@@ -58,7 +47,7 @@ public:
         state.position = pos;
         state.nectar_carried = 0.0;
         state.is_moving = false;
-        state.sigma = 1.0;
+        state.sigma = 0.0;
 
         switch(role) {
             case Role::FORAGER:
@@ -79,10 +68,18 @@ public:
 
     /* Internal transition: decides where to move next or consume energy */
     void internalTransition(BeeState& state) const override {
-        if(state.nectar_carried >= state.max_cap) {
-            state.is_moving = true;
+        if(state.nectar_carried >= state.max_cap || state.is_moving) {
+            state.previous_position = state.position;
+            state.position[0] = (state.position[0] + 1) % 10;
+            // state.position[1] = (state.position[1] + 1) % 10;
+            
+            state.nectar_carried = 0.0; // Reset capacity after moving
+            // state.is_moving = true;
+            state.just_moved = true;
+
         }else {
-            state.is_moving = false;
+            // state.is_moving = false;
+            state.just_moved = false;
         }
         state.sigma = 1.0;
     }
@@ -104,15 +101,37 @@ public:
 
     /* Bee sends a collect message to grid*/
     void output(const BeeState& state) const override {
-        if (!state.is_moving) {
-            BeeMovement msg;
-            msg.bee_id = state.id;
-            msg.x = state.position[0];
-            msg.y = state.position[1];
-            msg.entering = true;
-            msg.consumption_request = state.consumption_rate;
-            msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
-            out->addMessage(msg);
+        if (state.just_moved) {
+            // Send leaving message to old  cell
+            BeeMovement exit_msg;
+            exit_msg.bee_id = state.id;
+            exit_msg.x = state.previous_position[0];
+            exit_msg.y = state.previous_position[1];
+            exit_msg.action = 0; // Leaving
+            exit_msg.consumption_request = 0.0;
+            exit_msg.pollen_type = 0;
+            out->addMessage(exit_msg);
+
+            // Send arriving message to new cell
+            BeeMovement enter_msg;
+            enter_msg.bee_id = state.id;
+            enter_msg.x = state.position[0];
+            enter_msg.y = state.position[1];
+            enter_msg.action = 1; // Arriving
+            enter_msg.consumption_request = 0.0; // Don't eat on the exact tick of arrival
+            enter_msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
+            out->addMessage(enter_msg);
+
+        } else {
+            // staying 
+            BeeMovement stay_msg;
+            stay_msg.bee_id = state.id;
+            stay_msg.x = state.position[0];
+            stay_msg.y = state.position[1];
+            stay_msg.action = 2; // Staying
+            stay_msg.consumption_request = state.consumption_rate;
+            stay_msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
+            out->addMessage(stay_msg);
         }
     }
 
