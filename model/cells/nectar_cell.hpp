@@ -42,29 +42,30 @@ using namespace cadmium::celldevs;
 
 class NectarCell : public cadmium::celldevs::GridCell<nectarState, double> {
 public:
-    cadmium::Port<BeeMovement> bee_port;
-    cadmium::Port<ButterflyMovement> butterfly_port;
+    cadmium::Port<BeeMovement> in_bee_event;
+    cadmium::Port<ButterflyMovement> in_butterfly_event;
+    int x;
+    int y;
 
     // Constructor
     NectarCell(const cadmium::celldevs::coordinates& id,
                const std::shared_ptr<const cadmium::celldevs::GridCellConfig<nectarState, double>>& config)
     : GridCell<nectarState, double>(id, config) { 
-        bee_port = addInPort<BeeMovement>("in_bee_event");
-        butterfly_port = addInPort<ButterflyMovement>("in_butterfly_event");
+        x = id[0];
+        y = id[1];
+        in_bee_event = addInPort<BeeMovement>("in_bee_event");
+        in_butterfly_event = addInPort<ButterflyMovement>("in_butterfly_event");
     }
 
 
     // External Transition
     //  Triggered when bee sends a consumption request
     void externalTransition(double e) override {
-        // clock += e;
-        state.sigma -= e;
+        bool stateChanged = false;
 
-        // bool stateChanged = false;
-
-        for (auto const& beeMov : bee_port->getBag()) {
-            // stateChanged = true;
-           if (beeMov.x == this->id[0] && beeMov.y == this->id[1]) {
+        for (auto const& beeMov : in_bee_event->getBag()) {
+            stateChanged = true;
+           if (beeMov.x == x && beeMov.y == this->y) {
             if (beeMov.action == 1) {
                 state.bees++;
             } else if (beeMov.action == 0) {
@@ -87,9 +88,9 @@ public:
         }
     }
 
-        for (auto const& butterflyMov : butterfly_port->getBag()) {   
-            // stateChanged = true;   
-            if (bfMov.x == this->id[0] && bfMov.y == this->id[1]) {    
+        for (auto const& butterflyMov : in_butterfly_event->getBag()) {   
+            stateChanged = true;   
+            if (butterflyMov.x == x && butterflyMov.y == y) {    
             if (butterflyMov.action == 1) {
                 state.butterflies++;
             } else if (butterflyMov.action == 0) {
@@ -98,7 +99,6 @@ public:
 
             if (butterflyMov.consumption_request > 0) {
                 state.nectar_lvl -= butterflyMov.consumption_request;
-                // Less efficient carrier: more wasted pollen delivery.
                 state.pollen_lvl += (butterflyMov.consumption_request * 0.28);
             }
 
@@ -151,12 +151,9 @@ public:
         // state.conspecific_pollen = std::clamp(state.conspecific_pollen, 0.0, 1000.0);
         // state.heterospecific_pollen = std::clamp(state.heterospecific_pollen, 0.0, 1000.0);
 
-        // if (stateChanged) {
-        //     sigma = 0;
-        // } else {
-        //     sigma = outputQueue->nextTime() - clock;
-        // }
-
+        if (stateChanged) {
+            this->sigma = 0;
+        } 
     }
 
     // Local Computation
@@ -212,9 +209,7 @@ public:
         return 1.0;
     }
 
-    double timeAdvance(const nectarState& state) const override {
-        return 1.0; 
-    }
+   
 };
 
 #endif

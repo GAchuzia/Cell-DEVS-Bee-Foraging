@@ -21,11 +21,11 @@ struct ButterflyState {
     bool just_moved;
 };
 
+
 inline std::ostream& operator<<(std::ostream& os, const ButterflyState& s) {
-    os << "<" << s.id << "," << s.position[0] << "," << s.position[1] << ">";
+    os << "<" << s.position[0] << "," << s.position[1] << "," << s.consumption_rate << ">";
     return os;
 }
-
 class Butterfly : public Atomic<ButterflyState> {
 public:
     Port<ButterflyMovement> out;
@@ -37,8 +37,10 @@ public:
         in = addInPort<double>("in");
 
         state.id = id;
-        state.position = std::move(pos);
+        state.position = pos;
+        state.previous_position = pos;
         state.consumption_rate = 0.35;
+        state.just_moved = false; 
         state.sigma = 1.0;
         state.should_emit = true;
     }

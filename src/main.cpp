@@ -24,65 +24,34 @@ public:
         file >> j;
         auto grid = std::make_shared<NectarGrid>("nectar_grid", configPath);
 
-    //     // Create bee starting at position (4,4)
-    //     std::vector<int> startPos = {4, 4};
-    //     auto bee1 = std::make_shared<Bee>(1, Role::FORAGER, startPos);
-    //     auto bee2 = std::make_shared<Bee>(2, Role::SCOUT, std::vector<int>{2, 2});
-    //     auto bee3 = std::make_shared<Bee>(3, Role::SCOUT, std::vector<int>{5, 4});
-
-        
-    //     auto butterfly1 = std::make_shared<Butterfly>(1, std::vector<int>{7, 7});
-    //     auto butterfly2 = std::make_shared<Butterfly>(2, std::vector<int>{8, 9});
-
-    //     this->addComponent(grid);
-    //     this->addComponent(bee1);
-    //     this->addComponent(bee2);
-    //     this->addComponent(bee3);
-
-    //     this->addComponent(butterfly1);
-    //             this->addComponent(butterfly2);
-
-
-    //     // Connect bee output to grid input port
-    //     this->addIC(bee1->getId(), "out", grid->getId(), "in_bee_move");
-    //     this->addIC(bee2->getId(), "out", grid->getId(), "in_bee_move");
-    //     this->addIC(bee3->getId(), "out", grid->getId(), "in_bee_move");
-    //    // this->addIC(bee4->getId(), "out", grid->getId(), "in_bee_move");
-
-    //     this->addIC(butterfly1->getId(), "out", grid->getId(), "in_butterfly_move");
-    //             this->addIC(butterfly2->getId(), "out", grid->getId(), "in_butterfly_move");
-
         this->addComponent(grid);
+        int nextId = 1;
 
-        // 3. Dynamically create and route Bees
-        if (j.contains("agents") && j["agents"].contains("bees")) {
-            for (const auto& b : j["agents"]["bees"]) {
-                int beeId = b["id"];
-                std::vector<int> pos = b["pos"];
-                std::string roleStr = b["role"];
-                
-                // Map string to Role enum
-                Role role = Role::SCOUT; 
-                if (roleStr == "FORAGER") role = Role::FORAGER;
-                else if (roleStr == "NURSE") role = Role::NURSE;
-
-                auto bee = std::make_shared<Bee>(beeId, role, pos);
-                this->addComponent(bee);
-                this->addIC(bee->out, grid->in_bee_move);
-            }
+        // Dynamically create and route bees
+        if (j["cells"].contains("initial_agents") && j["cells"]["initial_agents"].contains("cell_map")) {
+        auto beePositions = j["cells"]["initial_agents"]["cell_map"].get<std::vector<std::vector<int>>>();
+        
+        for (const auto& pos : beePositions) {
+            auto bee = std::make_shared<Bee>(nextId++, Role::FORAGER, pos);
+            this->addComponent(bee);
+            this->addIC(bee->out, grid->in_bee_move);
         }
+        std::cout << "Instantiated " << beePositions.size() << " bees from config." << std::endl;
+     } 
 
         // 4. Dynamically create and route Butterflies
-        if (j.contains("agents") && j["agents"].contains("butterflies")) {
-            for (const auto& b : j["agents"]["butterflies"]) {
-                int butId = b["id"];
-                std::vector<int> pos = b["pos"];
+        if (j["cells"].contains("initial_butterflies") && j["cells"]["initial_butterflies"].contains("cell_map")) {
+        auto butterflyPositions = j["cells"]["initial_butterflies"]["cell_map"].get<std::vector<std::vector<int>>>();
+        
+        for (const auto& pos : butterflyPositions) {
+            auto butterfly = std::make_shared<Butterfly>(nextId++, pos);
+            this->addComponent(butterfly);
+            this->addIC(butterfly->out, grid->in_butterfly_move);
 
-                auto butterfly = std::make_shared<Butterfly>(butId, pos);
-                this->addComponent(butterfly);
-                this->addIC(butterfly->out, grid->in_butterfly_move);
-            }
         }
+        std::cout << "Instantiated " << butterflyPositions.size() << " butterflies from config." << std::endl;
+    }
+        
     }
 
 };

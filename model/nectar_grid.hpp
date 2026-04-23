@@ -45,11 +45,9 @@ public:
                 } catch (const cadmium::CadmiumModelException& e) {
                     std::cout << "Failed to link cell: " << cellIdStr << " - " << e.what() << std::endl;
                 }
-                               
             }
         }
-        std::cout << "Grid initialized with shape: " << grid_shape[0] << "x" << grid_shape[1] << std::endl;
-            
+        std::cout << "Grid initialized with shape: " << grid_shape[0] << "x" << grid_shape[1] << std::endl;    
     }
 
 private:
