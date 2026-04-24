@@ -22,6 +22,19 @@
         { "type": "von_neumann", "range": 1 }
       ]
     },
+    "plant_a_hotspots": {
+      "state": {
+        "nectar": 90.0,
+        "pollen": 40.0,
+        "bees": 0,
+        "butterflies": 0,
+        "plant_species": 1,
+        "pollen_type": 1,
+        "conspecific_pollen": 2.0,
+        "heterospecific_pollen": 0.0
+      },
+      "cell_map": [[0, 0], [1, 1], [2, 2], [0, 1]]
+    },
     "river_barrier": {
       "state": {
         "nectar": 0.0,
@@ -62,7 +75,7 @@
       "state": { "bees": 1 }
     },
     "initial_butterflies": {
-      "cell_map": [[0, 9], [6, 3]],
+      "cell_map": [[0, 9], [5, 3]],
       "state": { "butterflies": 1 }
     }
   },
