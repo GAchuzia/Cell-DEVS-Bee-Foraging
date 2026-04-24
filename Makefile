@@ -17,7 +17,7 @@ define FILTER_LOG_FOR_WEB_VIEWER
 	awk -F';' 'NR<=2 || ($$3 ~ /^\([0-9]+,[0-9]+\)$$/ && $$5 ~ /^<[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+,[^,]+>$$/) { print }' "$(1)" > "$(1).tmp" && mv -f "$(1).tmp" "$(1)"
 endef
 
-.PHONY: all clean run tests test1 test2 test3 test4 test5 results_dir
+.PHONY: all clean run tests test1 test2 test3 test4 test5 test6 results_dir
 
 all: $(TARGET)
 
@@ -55,4 +55,8 @@ test5: all results_dir
 	./$(TARGET) config/tests/test5_multi_species_config.json simulation_results/test5_multi_species_grid_log.csv
 	$(call FILTER_LOG_FOR_WEB_VIEWER,simulation_results/test5_multi_species_grid_log.csv)
 
-tests: test1 test2 test3 test4 test5
+test6: all results_dir
+	./$(TARGET) config/tests/test6_river_config.json simulation_results/test6_river_grid_log.csv
+	$(call FILTER_LOG_FOR_WEB_VIEWER,simulation_results/test6_river_grid_log.csv)
+
+tests: test1 test2 test3 test4 test5 test6
