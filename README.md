@@ -72,7 +72,7 @@ The simulation horizon is **50** time units.
 
 `make run` and each `make testN` also filter the produced CSV in place for the Cell-DEVS web viewer (see `FILTER_LOG_FOR_WEB_VIEWER` in the `Makefile`).
 
-## Test scenario previews
+## Test Scenarios
 
 Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).
 
