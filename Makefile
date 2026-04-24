@@ -3,8 +3,8 @@ CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
 # Paths (edit manually per machine)
-CADMIUM_PATH = /home/Achuzia/rt_cadmium/include
-JSON_PATH = /home/Achuzia/libs
+CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
+JSON_PATH ?= /home/Achuzia/libs
 
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 
