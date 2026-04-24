@@ -76,33 +76,33 @@ The simulation horizon is **50** time units.
 
 Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).
 
-**Test 1 — no pollinators**  
+**Test 1: no pollinators**  
 Two plant species and pollen types, with zero bees and butterflies.
 
-![Test 1 — no pollinators](assets/test1.gif)
+![Test 1: no pollinators](assets/test1.gif)
 
-**Test 2 — center foragers**  
+**Test 2: center foragers**  
 Four center bees and two butterflies on an unwrapped grid.
 
-![Test 2 — center foragers](assets/test2.gif)
+![Test 2: center foragers](assets/test2.gif)
 
-**Test 3 — unwrapped boundaries**  
+**Test 3: unwrapped boundaries**  
 West species-B band plus southeast species-A hotspot on hard edges (`wrapped: false`).
 
-![Test 3 — unwrapped boundaries](assets/test3.gif)
+![Test 3: unwrapped boundaries](assets/test3.gif)
 
-**Test 4 — wrapped torus**  
+**Test 4: wrapped torus**  
 Northwest species-A patch and east species-B band on a torus (`wrapped: true`).
 
-![Test 4 — wrapped torus](assets/test4.gif)
+![Test 4: wrapped torus](assets/test4.gif)
 
-**Test 5 — general multi-species reference**  
+**Test 5: general multi-species reference**  
 Wrapped dual-species baseline with five bees and two butterflies.
 
-![Test 5 — multi-species reference](assets/test5.gif)
+![Test 5: multi-species reference](assets/test5.gif)
 
-**Test 6 — river barrier**  
+**Test 6: river barrier**  
 A full river row splits the grid and constrains pollinator movement.   
 **Note:** This test is based on a previous version of the simulation based on Asymmetric Cell-DEVS
 
-![Test 6 — river barrier](assets/test6.gif)
+![Test 6: river barrier](assets/test6.gif)
