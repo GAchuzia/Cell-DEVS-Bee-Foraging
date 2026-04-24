@@ -33,7 +33,7 @@
         "conspecific_pollen": 2.0,
         "heterospecific_pollen": 0.0
       },
-      "cell_map": [[0, 0], [1, 1], [2, 2], [0, 1]]
+      "cell_map": [[9, 9], [8, 8], [7, 7], [9, 8]]
     },
     "plant_b_region": {
       "state": {
@@ -47,97 +47,91 @@
         "heterospecific_pollen": 0.2
       },
       "cell_map": [
-        [0, 5], [0, 6], [0, 7], [0, 8],
-        [1, 5], [1, 6], [1, 7], [1, 9],
-        [2, 5], [2, 6], [2, 7], [2, 8], [2, 9],
-        [3, 5], [3, 6], [3, 7], [3, 8], [3, 9],
-        [4, 5], [4, 6], [4, 7], [4, 8], [4, 9],
-        [5, 6], [5, 7], [5, 8], [5, 9],
-        [6, 5], [6, 6], [6, 7], [6, 8], [6, 9],
-        [7, 5], [7, 6], [7, 7], [7, 8], [7, 9],
-        [8, 5], [8, 6], [8, 7], [8, 8], [8, 9],
-        [9, 5], [9, 6], [9, 7], [9, 8], [9, 9]
+        [0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2],
+        [3, 0], [3, 1], [3, 2], [4, 0], [4, 1], [4, 2], [5, 0], [5, 1], [5, 2],
+        [6, 0], [6, 1], [6, 2], [7, 0], [7, 1], [7, 2], [8, 0], [8, 1], [8, 2],
+        [9, 0], [9, 1], [9, 2]
       ]
     },
     "initial_agents": {
-      "cell_map": [[5, 5], [5, 4], [9, 0], [1, 8], [2, 1]],
+      "cell_map": [[2, 1], [4, 0], [1, 2], [3, 2], [5, 1]],
       "state": { "bees": 1 }
     },
     "initial_butterflies": {
-      "cell_map": [[0, 9], [4, 4]],
+      "cell_map": [[6, 6], [9, 5]],
       "state": { "butterflies": 1 }
     }
   },
   "viewer": [
     {
       "field": "nectar",
-      "notes": "Nectar (0–100): ivory to pale lime to mint to spring green to grass green to forest green.",
+      "notes": "Test 3 unwrapped — nectar (0–100): ice blue to teal to indigo (cool ramp).",
       "colors": [
-        [255, 255, 224],
-        [220, 245, 200],
-        [180, 230, 170],
-        [140, 210, 140],
-        [90, 180, 90],
-        [34, 139, 34]
+        [248, 252, 255],
+        [200, 230, 255],
+        [120, 200, 230],
+        [70, 160, 200],
+        [40, 100, 160],
+        [25, 50, 110]
       ],
       "breaks": [0, 10, 25, 40, 60, 80, 100]
     },
     {
       "field": "pollen",
-      "notes": "Pollen (0–50): white to cream to light yellow to gold to orange to deep orange.",
+      "notes": "Test 3 — pollen (0–50): lilac to violet to plum.",
       "colors": [
-        [255, 255, 255],
-        [255, 240, 200],
-        [255, 220, 120],
-        [255, 200, 60],
-        [255, 165, 0],
-        [255, 120, 0]
+        [255, 250, 255],
+        [230, 210, 250],
+        [190, 160, 230],
+        [150, 100, 200],
+        [100, 50, 150],
+        [60, 20, 90]
       ],
       "breaks": [0, 5, 10, 20, 30, 40, 50]
     },
     {
       "field": "bees",
-      "notes": "Bees: black to dark yellow-green to yellow to amber to orange to red.",
+      "notes": "Test 3 — bees: ink to amber on blue-gray.",
       "colors": [
-        [0, 0, 0],
-        [120, 120, 0],
-        [200, 200, 0],
-        [255, 180, 0],
-        [255, 100, 0],
-        [255, 0, 0]
+        [15, 25, 40],
+        [60, 80, 100],
+        [140, 130, 60],
+        [220, 170, 40],
+        [255, 140, 0],
+        [255, 80, 0]
       ],
       "breaks": [0, 0.1, 1, 3, 8, 15, 25]
     },
     {
       "field": "butterflies",
-      "notes": "Butterflies: black to deep rose to hot pink to light pink.",
+      "notes": "Test 3 — butterflies: midnight to orchid to blush.",
       "colors": [
-        [0, 0, 0],
-        [95, 20, 55],
-        [230, 70, 140],
-        [255, 200, 235]
+        [10, 10, 30],
+        [80, 40, 120],
+        [180, 80, 180],
+        [255, 190, 220]
       ],
       "breaks": [0, 0.1, 1, 5, 25]
     },
     {
       "field": "plant_species",
-      "notes": "Plant species (discrete): no plant (black), species A (green), species B (blue).",
+      "notes": "Test 3 — species A SE hotspot (mint), species B west strip (slate blue).",
       "colors": [
-        [0, 0, 0],
-        [30, 160, 30],
-        [120, 120, 255]
+        [20, 22, 28],
+        [60, 200, 160],
+        [70, 110, 170]
       ],
       "breaks": [0, 1, 2, 3]
     },
     {
       "field": "heterospecific_pollen",
-      "notes": "Mismatched pollen: light gray to peach to light orange to coral to rust.",
+      "notes": "Test 3 — heterospecific pollen: mist to mauve to wine.",
       "colors": [
-        [245, 245, 245],
-        [255, 220, 180],
-        [255, 170, 120],
-        [255, 120, 80],
-        [220, 70, 40]
+        [240, 238, 245],
+        [220, 200, 230],
+        [190, 140, 180],
+        [150, 80, 130],
+        [90, 30, 70]
       ],
       "breaks": [0, 1, 3, 6, 10, 20]
     }
