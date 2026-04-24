@@ -21,7 +21,7 @@
    "viewer": [
     {
       "field": "nectar",
-      "notes": "Smooth green gradient (low → high)",
+      "notes": "Smooth green gradient (low to high)",
       "colors": [
         [255, 255, 224],
         [220, 245, 200],
@@ -34,7 +34,7 @@
     },
     {
       "field": "pollen",
-      "notes": "White → yellow → deep orange gradient",
+      "notes": "White to yellow to deep orange gradient",
       "colors": [
         [255, 255, 255],
         [255, 240, 200],
@@ -47,7 +47,7 @@
     },
     {
       "field": "bees",
-      "notes": "Black → yellow → orange → red gradient",
+      "notes": "Black to yellow to orange to red gradient",
       "colors": [
         [0, 0, 0],
         [120, 120, 0],
