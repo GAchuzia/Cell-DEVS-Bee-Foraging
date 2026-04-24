@@ -25,6 +25,8 @@ struct BeeState {
     double sigma;
     bool just_moved; //flag to trigger output 
     bool is_moving;
+    bool announced_position;
+    bool received_cell_feedback;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const BeeState& s) {
@@ -50,12 +52,14 @@ public:
         state.nectar_carried = 0.0;
         state.is_moving = false;
         state.just_moved = false; 
+        state.announced_position = false;
+        state.received_cell_feedback = false;
         state.sigma = 1.0;
 
         switch(role) {
             case Role::FORAGER:
                 state.consumption_rate = 0.5;
-                state.max_cap = 10.0;
+                state.max_cap = 2.0;
                 break;
             case Role::SCOUT:
                 state.consumption_rate = 0.1;
@@ -66,31 +70,38 @@ public:
 
     /* Internal transition: decides where to move next or consume energy */
     void internalTransition(BeeState& state) const override {
+        if (!state.received_cell_feedback && !state.is_moving) {
+            state.nectar_carried = std::min(state.max_cap, state.nectar_carried + state.consumption_rate);
+        }
+
         if(state.nectar_carried >= state.max_cap || state.is_moving) {
             state.prev_position = state.position;
             state.position[0] = (state.position[0] + 1) % 10;
-            // state.position[1] = (state.position[1] + 1) % 10;
-            
-            state.nectar_carried = 0.0; // Reset capacity after moving
+
+            state.nectar_carried = 0.0;
             state.is_moving = false;
             state.just_moved = true;
+            state.announced_position = true;
 
-        }else {
-            // state.is_moving = false;
+        } else {
             state.just_moved = false;
+            state.announced_position = true;
         }
+
+        state.received_cell_feedback = false;
         state.sigma = 1.0;
     }
 
     /* External transition: receives message from cell about nectar level*/
     void externalTransition(BeeState& state, double e) const override {
-        state.sigma -= e;
+        state.sigma = std::max(0.0, state.sigma - e);
         for (const auto &msg : in->getBag()) {
+            state.received_cell_feedback = true;
             double nectar_in_cell = msg;
             if (state.role == Role::FORAGER && nectar_in_cell > 0.1){
                 double actual_grab = std::min(state.consumption_rate, nectar_in_cell);
                 state.nectar_carried += actual_grab;
-                state.is_moving = false; // Stay and eat
+                state.is_moving = false;
             }
             if (nectar_in_cell < 1.0) {
                 state.is_moving = true;
@@ -122,13 +133,12 @@ public:
             out->addMessage(enter_msg);
 
         } else {
-            // staying 
             BeeMovement stay_msg;
             stay_msg.bee_id = state.id;
             stay_msg.x = state.position[0];
             stay_msg.y = state.position[1];
-            stay_msg.action = 2; // Staying
-            stay_msg.consumption_request = state.consumption_rate;
+            stay_msg.action = state.announced_position ? 2 : 1;
+            stay_msg.consumption_request = state.announced_position ? state.consumption_rate : 0.0;
             stay_msg.pollen_type = (state.position[0] < 5) ? 1 : 2;
             out->addMessage(stay_msg);
         }
