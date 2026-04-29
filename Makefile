@@ -22,10 +22,10 @@ endef
 all: $(TARGET)
 	@echo "Build successful: ./$(TARGET) is ready."
 	@echo "Next steps:"
-	@echo "  make run      # run default visualization pair"
+	@echo "  make run      # run default simulation"
 	@echo "  make test1    # run one test scenario"
 	@echo "  make tests    # run all six test scenarios"
-	@echo "Note: use make targets for viewer-ready (filtered) CSV files."
+	@echo "Note: use make targets to generate DEVS Web Viewer-ready CSV files."
 
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) $(SRC) $(INCLUDES) -o $(TARGET)
