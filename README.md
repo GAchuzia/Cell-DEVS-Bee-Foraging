@@ -33,47 +33,36 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
 ## Build
 
-Use these steps from the repository root. They are written to work for any user by replacing paths with your local folders.
+From the repository root:
 
-**Step 1:** Open a terminal and go to the project root.
+**Step 1:** Open a terminal in the project root.
 
 ```bash
 cd /path/to/Cell-DEVS-Bee-Foraging
 ```
 
-**Step 2:** Make sure dependencies are available:
+**Step 2:** Ensure dependencies exist:
 
 - `g++` with C++17 support
-- Cadmium headers
-- `nlohmann/json.hpp` under a folder named `nlohmann` (so include path resolves `#include <nlohmann/json.hpp>`)
+- Cadmium headers at `/home/cadmium/rt_cadmium/include` (default server path)
+- `nlohmann/json.hpp` under `$HOME/libs/nlohmann/json.hpp` (default user path)
 
-**Step 3:** Build using explicit include roots:
+**Step 3:** Build.
+
+```bash
+make
+```
+
+`Makefile` defaults:
+
+- `CADMIUM_PATH=/home/cadmium/rt_cadmium/include`
+- `JSON_PATH=$(HOME)/libs` (parent directory containing `nlohmann/`)
+
+If your paths differ, override them at build time:
 
 ```bash
 make CADMIUM_PATH=/absolute/path/to/rt_cadmium/include JSON_PATH=/absolute/path/to/parent/of/nlohmann
 ```
-
-Example: if `json.hpp` is at `/home/user/libs/nlohmann/json.hpp`, then use `JSON_PATH=/home/user/libs`.
-
-**If you do not pass these variables in the `make` command, edit `Makefile` directly before building.**
-
-Change this section in `Makefile`:
-
-```make
-# Paths (edit manually per machine)
-CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
-JSON_PATH ?= /home/Achuzia/libs
-```
-
-to your local paths, for example:
-
-```make
-# Paths (edit manually per machine)
-CADMIUM_PATH ?= /home/your_user/rt_cadmium/include
-JSON_PATH ?= /home/your_user/libs
-```
-
-`JSON_PATH` must be the parent directory that contains the `nlohmann/` folder.
 
 **Step 4:** Confirm build output:
 
@@ -82,7 +71,6 @@ ls nectar
 ```
 
 This produces the `nectar` executable.
-
 
 ## Run (Use Make Targets)
 
