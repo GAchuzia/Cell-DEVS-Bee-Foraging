@@ -21,7 +21,14 @@ public:
         
         std::ifstream file(configPath);
         nlohmann::json j;
-        file >> j;
+        if (!file.is_open()) {
+            throw std::runtime_error("Cannot open config file: " + configPath);
+        }
+        try {
+            file >> j;
+        } catch (const nlohmann::json::exception& e) {
+            throw std::runtime_error("Failed to parse JSON config '" + configPath + "': " + std::string(e.what()));
+        }
         auto grid = std::make_shared<NectarGrid>("nectar_grid", configPath);
 
         this->addComponent(grid);
@@ -60,7 +67,7 @@ public:
 
 int main(int argc, char* argv[]) {
 
-    std::string configPath = "config/tests/test5.json";
+    std::string configPath = "config/nectarVisualization_config.json";
     std::string logPath = "simulation_results/grid_log.csv";
 
     if (argc >= 2) {
@@ -74,7 +81,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    auto model = std::make_shared<BeeSimulation>("nectar", configPath);
+    std::shared_ptr<BeeSimulation> model;
+    try {
+        model = std::make_shared<BeeSimulation>("nectar", configPath);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
 
     auto rootCoordinator = RootCoordinator(model);
