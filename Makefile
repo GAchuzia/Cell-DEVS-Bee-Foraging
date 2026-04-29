@@ -22,7 +22,6 @@ endef
 all: $(TARGET)
 	@echo "Build successful: ./$(TARGET) is ready."
 	@echo "Next steps:"
-	@echo "  make run      # run default visualization scenario"
 	@echo "  ./$(TARGET)   # run directly with default config"
 	@echo "  make tests    # run all six test scenarios"
 
