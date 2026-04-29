@@ -114,6 +114,8 @@ Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).
 
 In these scenarios, butterflies are modeled with diagonal movement to highlight theiir less efficient exploration compared to bees.
 
+**Note:** The play button does not always show the correct visualization in the DEVS Web Viewer, so use the slider to view panel updates. You can also see preview GIFs in the [`assets/`](./assets/) folder.
+
 **Test 1: no pollinators**  
 Two plant species and pollen types, with zero bees and butterflies.
 
