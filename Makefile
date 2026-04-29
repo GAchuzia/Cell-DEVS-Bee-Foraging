@@ -2,9 +2,9 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
-# Paths (edit manually per machine)
-CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
-JSON_PATH ?= /home/Achuzia/libs
+# Paths (user-based defaults; override if your setup differs)
+CADMIUM_PATH ?= $(HOME)/rt_cadmium/include
+JSON_PATH ?= $(HOME)/libs
 
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
 
