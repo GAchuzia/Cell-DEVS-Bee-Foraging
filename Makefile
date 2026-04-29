@@ -20,6 +20,11 @@ endef
 .PHONY: all clean run tests test1 test2 test3 test4 test5 test6 results_dir
 
 all: $(TARGET)
+	@echo "Build successful: ./$(TARGET) is ready."
+	@echo "Next steps:"
+	@echo "  make run      # run default visualization scenario"
+	@echo "  ./$(TARGET)   # run directly with default config"
+	@echo "  make tests    # run all six test scenarios"
 
 $(TARGET): $(SRC)
 	$(CXX) $(CXXFLAGS) $(SRC) $(INCLUDES) -o $(TARGET)
