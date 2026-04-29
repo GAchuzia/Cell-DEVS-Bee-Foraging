@@ -112,7 +112,7 @@ The simulation horizon is **50** time units.
 
 Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).  
 
-In these scenarios, butterflies are modeled with diagonal movement to highlight faster but less efficient exploration than bees.
+In these scenarios, butterflies are modeled with diagonal movement to highlight theiir less efficient exploration compared to bees.
 
 **Test 1: no pollinators**  
 Two plant species and pollen types, with zero bees and butterflies.
