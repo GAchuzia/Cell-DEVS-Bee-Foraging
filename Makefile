@@ -2,8 +2,8 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -g
 
-# Paths (user-based defaults; override if your setup differs)
-CADMIUM_PATH ?= $(HOME)/rt_cadmium/include
+# Paths (Cadmium often shared system-wide; JSON typically user-local)
+CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
 JSON_PATH ?= $(HOME)/libs
 
 INCLUDES = -I$(CADMIUM_PATH) -I$(JSON_PATH) -I./src
@@ -28,6 +28,8 @@ all: $(TARGET)
 	@echo "Note: use make targets to generate DEVS Web Viewer-ready CSV files."
 
 $(TARGET): $(SRC)
+	@test -f "$(CADMIUM_PATH)/cadmium/simulation/root_coordinator.hpp" || (echo "Error: Cadmium headers not found at CADMIUM_PATH=$(CADMIUM_PATH)"; echo "Set CADMIUM_PATH, e.g. make CADMIUM_PATH=/home/cadmium/rt_cadmium/include"; exit 1)
+	@test -f "$(JSON_PATH)/nlohmann/json.hpp" || (echo "Error: json.hpp not found at JSON_PATH=$(JSON_PATH)/nlohmann/json.hpp"; echo "Set JSON_PATH to the parent folder containing nlohmann/, e.g. make JSON_PATH=\$$HOME/libs"; exit 1)
 	$(CXX) $(CXXFLAGS) $(SRC) $(INCLUDES) -o $(TARGET)
 
 results_dir:
