@@ -96,6 +96,10 @@ int main(int argc, char* argv[]) {
     rootCoordinator.start();
     rootCoordinator.simulate(50.0);
     rootCoordinator.stop();
+    std::cout << "Simulation completed successfully." << std::endl;
+    std::cout << "Config used: " << configPath << std::endl;
+    std::cout << "CSV log written to: " << logPath << std::endl;
+    std::cout << "Load this pair in the viewer: " << configPath << " + " << logPath << std::endl;
 
     return 0;
 }
