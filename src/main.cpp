@@ -120,7 +120,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Simulation completed successfully." << std::endl;
     std::cout << "Config used: " << configPath << std::endl;
     std::cout << "CSV log written to: " << logPath << std::endl;
-    std::cout << "Load this pair in the viewer: " << configPath << " + " << logPath << std::endl;
+    std::cout << "Direct ./nectar output is raw Cadmium CSV." << std::endl;
+    std::cout << "For viewer-ready filtered CSV, run via Makefile targets (make run / make testN)." << std::endl;
+    std::cout << "Raw pair generated: " << configPath << " + " << logPath << std::endl;
 
     return 0;
 }
