@@ -33,25 +33,73 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
 ## Build
 
-From the repository root (adjust paths for your machine):
+Use these steps from the repository root. They are written to work for any user by replacing paths with your local folders.
+
+**Step 1:** Open a terminal and go to the project root.
 
 ```bash
-make
-# Optional overrides:
-# make CADMIUM_PATH=/path/to/cadmium/include JSON_PATH=/path/to/json/include
+cd /path/to/Cell-DEVS-Bee-Foraging
 ```
 
-Produces the `nectar` executable.
+**Step 2:** Make sure dependencies are available:
 
-## Run
+- `g++` with C++17 support
+- Cadmium headers
+- `nlohmann/json.hpp` under a folder named `nlohmann` (so include path resolves `#include <nlohmann/json.hpp>`)
+
+**Step 3:** Build using explicit include roots:
 
 ```bash
-# Defaults: config/nectarVisualization_config.json and simulation_results/grid_log.csv
-./nectar
-
-# Explicit paths:
-./nectar config/tests/test1_no_bees_config.json simulation_results/test1_grid_log.csv
+make CADMIUM_PATH=/absolute/path/to/rt_cadmium/include JSON_PATH=/absolute/path/to/parent/of/nlohmann
 ```
+
+Example: if `json.hpp` is at `/home/user/libs/nlohmann/json.hpp`, then use `JSON_PATH=/home/user/libs`.
+
+**If you do not pass these variables in the `make` command, edit `Makefile` directly before building.**
+
+Change this section in `Makefile`:
+
+```make
+# Paths (edit manually per machine)
+CADMIUM_PATH ?= /home/cadmium/rt_cadmium/include
+JSON_PATH ?= /home/Achuzia/libs
+```
+
+to your local paths, for example:
+
+```make
+# Paths (edit manually per machine)
+CADMIUM_PATH ?= /home/your_user/rt_cadmium/include
+JSON_PATH ?= /home/your_user/libs
+```
+
+`JSON_PATH` must be the parent directory that contains the `nlohmann/` folder.
+
+**Step 4:** Confirm build output:
+
+```bash
+ls nectar
+```
+
+This produces the `nectar` executable.
+
+
+## Run (Use Make Targets)
+
+```bash
+# Always run scenarios through make targets:
+make run
+make test1
+make tests
+```
+
+Do **not** use `./nectar` for normal runs. The expected workflow is `make run` / `make testN` so logs are filtered for the Cell-DEVS web viewer.
+
+For visualization/reporting, the input config and output CSV are a pair:
+- Main/default result pair: `config/nectarVisualization_config.json` + `simulation_results/grid_log.csv`
+- All other `config/tests/*_config.json` with their `simulation_results/test*_grid_log.csv` outputs are test runs (tests 1-6)
+
+`./nectar` is only for advanced/manual debugging. It writes a raw Cadmium CSV that is not the recommended submission/viewer format.
 
 The simulation horizon is **50** time units.
 
