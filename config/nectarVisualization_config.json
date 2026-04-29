@@ -22,18 +22,45 @@
         { "type": "von_neumann", "range": 1 }
       ]
     },
-    "high_activity_zone": {
+    "plant_a_hotspots": {
       "state": {
-        "nectar": 50.0,
-        "pollen": 20.0,
-        "bees": 15,
+        "nectar": 85.0,
+        "pollen": 32.0,
+        "bees": 0,
         "butterflies": 0,
         "plant_species": 1,
-        "pollen_type": 0,
-        "conspecific_pollen": 0.0,
+        "pollen_type": 1,
+        "conspecific_pollen": 1.5,
         "heterospecific_pollen": 0.0
       },
-      "cell_map": [[4, 4], [4, 5], [5, 4], [5, 5]]
+      "cell_map": [[0, 0], [1, 1], [2, 2], [0, 1], [3, 2]]
+    },
+    "plant_b_band": {
+      "state": {
+        "nectar": 70.0,
+        "pollen": 28.0,
+        "bees": 0,
+        "butterflies": 0,
+        "plant_species": 2,
+        "pollen_type": 2,
+        "conspecific_pollen": 0.8,
+        "heterospecific_pollen": 0.3
+      },
+      "cell_map": [
+        [0, 6], [0, 7], [0, 8], [0, 9],
+        [1, 6], [1, 7], [1, 8], [1, 9],
+        [2, 6], [2, 7], [2, 8], [2, 9],
+        [3, 6], [3, 7], [3, 8], [3, 9],
+        [4, 6], [4, 7], [4, 8], [4, 9]
+      ]
+    },
+    "initial_agents": {
+      "cell_map": [[4, 4], [4, 5], [5, 4], [5, 5], [2, 1], [8, 2]],
+      "state": { "bees": 1 }
+    },
+    "initial_butterflies": {
+      "cell_map": [[5, 1], [3, 3], [7, 7]],
+      "state": { "butterflies": 1 }
     }
   },
   "viewer": [

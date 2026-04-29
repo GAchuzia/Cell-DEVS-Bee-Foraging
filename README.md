@@ -33,25 +33,61 @@ Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling use
 
 ## Build
 
-From the repository root (adjust paths for your machine):
+From the repository root:
+
+**Step 1:** Open a terminal in the project root.
+
+```bash
+cd /path/to/Cell-DEVS-Bee-Foraging
+```
+
+**Step 2:** Ensure dependencies exist:
+
+- `g++` with C++17 support
+- Cadmium headers at `/home/cadmium/rt_cadmium/include` (default server path)
+- `nlohmann/json.hpp` under `$HOME/libs/nlohmann/json.hpp` (default user path)
+
+**Step 3:** Build.
 
 ```bash
 make
-# Optional overrides:
-# make CADMIUM_PATH=/path/to/cadmium/include JSON_PATH=/path/to/json/include
 ```
 
-Produces the `nectar` executable.
+`Makefile` defaults:
 
-## Run
+- `CADMIUM_PATH=/home/cadmium/rt_cadmium/include`
+- `JSON_PATH=$(HOME)/libs` (parent directory containing `nlohmann/`)
+
+If your paths differ, override them at build time:
 
 ```bash
-# Defaults: config/nectarVisualization_config.json and simulation_results/grid_log.csv
-./nectar
-
-# Explicit paths:
-./nectar config/tests/test1_no_bees_config.json simulation_results/test1_grid_log.csv
+make CADMIUM_PATH=/absolute/path/to/rt_cadmium/include JSON_PATH=/absolute/path/to/parent/of/nlohmann
 ```
+
+**Step 4:** Confirm build output:
+
+```bash
+ls nectar
+```
+
+This produces the `nectar` executable.
+
+## Run (Use Make Targets)
+
+```bash
+# Always run scenarios through make targets:
+make run
+make test1
+make tests
+```
+
+Do **not** use `./nectar` for normal runs. The expected workflow is `make run` / `make testN` so logs are filtered for the Cell-DEVS web viewer.
+
+For visualization/reporting, the input config and output CSV are a pair:
+- Main/default result pair: `config/nectarVisualization_config.json` + `simulation_results/grid_log.csv`
+- All other `config/tests/*_config.json` with their `simulation_results/test*_grid_log.csv` outputs are test runs (tests 1-6)
+
+`./nectar` is only for advanced/manual debugging. It writes a raw Cadmium CSV that is not the recommended submission/viewer format.
 
 The simulation horizon is **50** time units.
 
@@ -74,7 +110,11 @@ The simulation horizon is **50** time units.
 
 ## Test Scenarios
 
-Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).
+Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).  
+
+In these scenarios, butterflies are modeled with diagonal movement to highlight theiir less efficient exploration compared to bees.
+
+**Note:** The play button does not always show the correct visualization in the DEVS Web Viewer, so use the slider to view panel updates. You can also see preview GIFs in the [`assets/`](./assets/) folder.
 
 **Test 1: no pollinators**  
 Two plant species and pollen types, with zero bees and butterflies.

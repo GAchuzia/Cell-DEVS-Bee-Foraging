@@ -39,7 +39,7 @@ public:
     Port<BeeMovement> out; // sends consumption & pollen request
     Port<double> in; // receives nectar levels from cell
     Bee(int id, Role role, std::vector <int> pos) :
-     Atomic<BeeState>("(" + std::to_string(pos[0]) + "," + std::to_string(pos[1]) + ")", BeeState()) {
+     Atomic<BeeState>("bee_" + std::to_string(id), BeeState()) {
         // initialize ports
         out = addOutPort<BeeMovement>("out");
         in  = addInPort<double>("in");
