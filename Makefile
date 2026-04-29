@@ -22,7 +22,8 @@ endef
 all: $(TARGET)
 	@echo "Build successful: ./$(TARGET) is ready."
 	@echo "Next steps:"
-	@echo "  ./$(TARGET)   # run directly with default config"
+	@echo "  make run      # run default visualization pair"
+	@echo "  make test1    # run one test scenario"
 	@echo "  make tests    # run all six test scenarios"
 
 $(TARGET): $(SRC)
@@ -36,8 +37,14 @@ clean:
 
 # Default scenario: config/nectarVisualization_config.json -> simulation_results/grid_log.csv
 run: all results_dir
+	@rm -f simulation_results/grid_log.csv
+	@echo "Running default pair:"
+	@echo "  config: config/nectarVisualization_config.json"
+	@echo "  output: simulation_results/grid_log.csv"
 	./$(TARGET)
 	$(call FILTER_LOG_FOR_WEB_VIEWER,simulation_results/grid_log.csv)
+	@echo "Done. Load in viewer:"
+	@echo "  config/nectarVisualization_config.json + simulation_results/grid_log.csv"
 
 test1: all results_dir
 	./$(TARGET) config/tests/test1_no_bees_config.json simulation_results/test1_grid_log.csv

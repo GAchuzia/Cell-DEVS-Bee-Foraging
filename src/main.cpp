@@ -81,21 +81,42 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    auto printRuntimeHint = [&](const std::string& err) {
+        std::cerr << "Simulation failed: " << err << std::endl;
+        std::cerr << "Config: " << configPath << std::endl;
+        std::cerr << "Output CSV target: " << logPath << std::endl;
+        if (err.find("component ID already defined") != std::string::npos) {
+            std::cerr << "Hint: duplicate component IDs were detected while building the model." << std::endl;
+            std::cerr << "Check that you rebuilt after updates (`make clean && make`) and that agent components use unique names." << std::endl;
+            std::cerr << "If editing config, keep each coordinate entry valid in initial_agents/initial_butterflies." << std::endl;
+        }
+    };
+
     std::shared_ptr<BeeSimulation> model;
     try {
         model = std::make_shared<BeeSimulation>("nectar", configPath);
     } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        printRuntimeHint(e.what());
+        return 1;
+    } catch (...) {
+        printRuntimeHint("unknown error while constructing the simulation model");
         return 1;
     }
 
+    try {
+        auto rootCoordinator = RootCoordinator(model);
+        rootCoordinator.setLogger<CSVLogger>(logPath, ";");
 
-    auto rootCoordinator = RootCoordinator(model);
-    rootCoordinator.setLogger<CSVLogger>(logPath, ";");
-
-    rootCoordinator.start();
-    rootCoordinator.simulate(50.0);
-    rootCoordinator.stop();
+        rootCoordinator.start();
+        rootCoordinator.simulate(50.0);
+        rootCoordinator.stop();
+    } catch (const std::exception& e) {
+        printRuntimeHint(e.what());
+        return 1;
+    } catch (...) {
+        printRuntimeHint("unknown error while running the coordinator");
+        return 1;
+    }
     std::cout << "Simulation completed successfully." << std::endl;
     std::cout << "Config used: " << configPath << std::endl;
     std::cout << "CSV log written to: " << logPath << std::endl;
