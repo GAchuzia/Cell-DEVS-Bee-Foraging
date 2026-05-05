@@ -119,30 +119,30 @@ In these scenarios, butterflies are modeled with diagonal movement to highlight 
 **Test 1: no pollinators**  
 Two plant species and pollen types, with zero bees and butterflies.
 
-![Test 1: no pollinators](assets/test1.gif)
+![Test 1: no pollinators](assets/test1_no_pollinators.gif)
 
 **Test 2: center foragers**  
 Four center bees and two butterflies on an unwrapped grid.
 
-![Test 2: center foragers](assets/test2.gif)
+![Test 2: center foragers](assets/test2_center_foragers.gif)
 
 **Test 3: unwrapped boundaries**  
 West species-B band plus southeast species-A hotspot on hard edges (`wrapped: false`).
 
-![Test 3: unwrapped boundaries](assets/test3.gif)
+![Test 3: unwrapped boundaries](assets/test3_unwrapped_boundaries.gif)
 
 **Test 4: wrapped torus**  
 Northwest species-A patch and east species-B band on a torus (`wrapped: true`).
 
-![Test 4: wrapped torus](assets/test4.gif)
+![Test 4: wrapped torus](assets/test4_wrapped_boundaries.gif)
 
 **Test 5: general multi-species reference**  
 Wrapped dual-species baseline with five bees and two butterflies.
 
-![Test 5: multi-species reference](assets/test5.gif)
+![Test 5: multi-species reference](assets/test5_multi_species.gif)
 
 **Test 6: river barrier**  
 A full river row splits the grid and constrains pollinator movement.   
 **Note:** This test is based on a previous version of the simulation based on Asymmetric Cell-DEVS
 
-![Test 6: river barrier](assets/test6.gif)
+![Test 6: river barrier](assets/test6_river_barrier.gif)
