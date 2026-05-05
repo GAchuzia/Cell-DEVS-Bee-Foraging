@@ -143,6 +143,6 @@ Wrapped dual-species baseline with five bees and two butterflies.
 
 **Test 6: river barrier**  
 A full river row splits the grid and constrains pollinator movement.   
-**Note:** This test is based on a previous version of the simulation based on Asymmetric Cell-DEVS
+**Note:** This test is based on Asymmetric Cell-DEVS with a river row obstacle.
 
 ![Test 6: river barrier](assets/test6_river_barrier.gif)
