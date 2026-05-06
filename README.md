@@ -1,148 +1,69 @@
-# Cell-DEVS-Bee-Foraging
+# Cell-DEVS Bee Foraging
 
-Cadmium Cell-DEVS model of bee foraging on a 10×10 grid.
+Model and simulation of pollinator foraging dynamics as a hybrid Cell-DEVS and DEVS system on a 10×10 asymmetric cell-space.
 
-Each cell is a nectar patch with nectar, pollen, and bees. Neighbor coupling uses a Von Neumann neighborhood.
+## Usage
 
-## Requirements
+To build the model, run
 
-- C++17 compiler (`g++`)
-- [Cadmium](https://github.com/SimulationEverywhere/cadmium) headers on the include path
-- [nlohmann/json](https://github.com/nlohmann/json) on the include path. Example on Linux/macOS:
-
-  ```bash
-  mkdir -p ~/libs/nlohmann
-  cd ~/libs/nlohmann
-  wget https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp
-  ```
-  
-  Then point `JSON_PATH` at the parent of `nlohmann` (e.g. `make JSON_PATH=$HOME/libs` so `#include <nlohmann/json.hpp>` resolves).
-
-## Layout
-
-| Path | Role |
-|------|------|
-| `src/main.cpp` | Builds `nectar` |
-| `model/nectar_grid.hpp` | Coupled Cell-DEVS grid |
-| `model/cells/nectar_cell.hpp` | Local transition \(\tau\) |
-| `model/cells/nectarState.hpp` | State struct and JSON parsing |
-| `config/nectarVisualization_config.json` | Default demo (center high-activity block) |
-| `config/tests/*_config.json` | Test scenarios (tests 1–6) |
-| `simulation_results/` | CSV logs and `.webm` recordings |
-| `assets/test*.gif` | Short GIF previews for the README (see **Test scenario previews** below) |
-
-## Build
-
-From the repository root:
-
-**Step 1:** Open a terminal in the project root.
-
-```bash
-cd /path/to/Cell-DEVS-Bee-Foraging
+```
+source build.sh
 ```
 
-**Step 2:** Ensure dependencies exist:
+To run the default scenario, run
 
-- `g++` with C++17 support
-- Cadmium headers at `/home/cadmium/rt_cadmium/include` (default server path)
-- `nlohmann/json.hpp` under `$HOME/libs/nlohmann/json.hpp` (default user path)
-
-**Step 3:** Build.
-
-```bash
-make
+```
+bash run.sh
 ```
 
-`Makefile` defaults:
+Output is logged to
 
-- `CADMIUM_PATH=/home/cadmium/rt_cadmium/include`
-- `JSON_PATH=$(HOME)/libs` (parent directory containing `nlohmann/`)
-
-If your paths differ, override them at build time:
-
-```bash
-make CADMIUM_PATH=/absolute/path/to/rt_cadmium/include JSON_PATH=/absolute/path/to/parent/of/nlohmann
+```
+simulation_results/grid_log.csv
 ```
 
-**Step 4:** Confirm build output:
+To run all six test scenarios, run
 
-```bash
-ls nectar
+```
+bash run_tests.sh
 ```
 
-This produces the `nectar` executable.
+Output for each test is logged to
 
-## Run (Use Make Targets)
-
-```bash
-# Always run scenarios through make targets:
-make run
-make test1
-make tests
+```
+simulation_results/test<N>_grid_log.csv
 ```
 
-Do **not** use `./nectar` for normal runs. The expected workflow is `make run` / `make testN` so logs are filtered for the Cell-DEVS web viewer.
+The scripts are:
 
-For visualization/reporting, the input config and output CSV are a pair:
-- Main/default result pair: `config/nectarVisualization_config.json` + `simulation_results/grid_log.csv`
-- All other `config/tests/*_config.json` with their `simulation_results/test*_grid_log.csv` outputs are test runs (tests 1-6)
+* `build.sh`: Compiles the project using CMake.
+* `run.sh`: Runs the default nectar visualization scenario.
+* `run_tests.sh`: Builds and runs all six test scenarios.
+* `test1.sh` – `test6.sh`: Run individual test scenarios.
+* `generate_asymm_configs.py`: Generates asymmetric Cell-DEVS JSON configs from scenario definitions.
 
-`./nectar` is only for advanced/manual debugging. It writes a raw Cadmium CSV that is not the recommended submission/viewer format.
+To visualize the output, upload the config and log CSV pair to the __[Cell-DEVS Web Viewer](https://devssim.carleton.ca/cell-devs-viewer/)__.
 
-The simulation horizon is **50** time units.
-
-## Make targets
-
-| Target | Config | Log output / effect |
-|--------|--------|---------------------|
-| `make`  | N/A | Compiles `./nectar` |
-| `make clean` | — | Removes the `nectar` binary only (does not delete CSV logs under `simulation_results/`) |
-| `make run` | `config/nectarVisualization_config.json` | `simulation_results/grid_log.csv` |
-| `make test1` | `config/tests/test1_no_bees_config.json` | `simulation_results/test1_grid_log.csv` |
-| `make test2` | `config/tests/test2_center_burst_config.json` | `simulation_results/test2_grid_log.csv` |
-| `make test3` | `config/tests/test3_corner_unwrapped_config.json` | `simulation_results/test3_unwrapped_grid_log.csv` |
-| `make test4` | `config/tests/test4_corner_wrapped_config.json` | `simulation_results/test4_wrapped_grid_log.csv` |
-| `make test5` | `config/tests/test5_multi_species_config.json` | `simulation_results/test5_multi_species_grid_log.csv` |
-| `make test6` | `config/tests/test6_river_config.json` | `simulation_results/test6_river_grid_log.csv` |
-| `make tests` | runs `test1`–`test6` in order | N/A (writes each test’s CSV under `simulation_results/`) |
-
-`make run` and each `make testN` also filter the produced CSV in place for the Cell-DEVS web viewer (see `FILTER_LOG_FOR_WEB_VIEWER` in the `Makefile`).
+For a detailed description of the project, see the __[report](Report.pdf)__.
 
 ## Test Scenarios
 
-Screen captures from the Cell-DEVS web viewer (GIFs under `assets/`).  
+* **Test 1 – No pollinators:** Two plant species with zero bees and butterflies. Nectar and pollen dynamics run undisturbed.
+* **Test 2 – Center foragers:** Four bees and two butterflies starting at center cells on an unwrapped grid.
+* **Test 3 – Corner foragers (unwrapped):** Species-B band on the west edge and a species-A hotspot at the southeast corner; hard boundaries.
+* **Test 4 – Wrapped torus:** Northwest species-A patch and east species-B band on a torus topology.
+* **Test 5 – Multi-species reference:** Dual-species grid with five bees and two butterflies.
+* **Test 6 – River barrier:** All cells in row 4 are topologically isolated using asymmetric Cell-DEVS neighborhoods, splitting the grid into two fully independent halves.
 
-In these scenarios, butterflies are modeled with diagonal movement to highlight theiir less efficient exploration compared to bees.
+## Requirements
 
-**Note:** The play button does not always show the correct visualization in the DEVS Web Viewer, so use the slider to view panel updates. You can also see preview GIFs in the [`assets/`](./assets/) folder.
+* __[Cadmium v2](https://github.com/Sasisekhar/cadmium_v2)__
 
-**Test 1: no pollinators**  
-Two plant species and pollen types, with zero bees and butterflies.
+## Further Reading
 
-![Test 1: no pollinators](assets/test1_no_pollinators.gif)
+* __[Asymmetric Cell-DEVS models with the Cadmium Simulator](https://www.sciencedirect.com/science/article/pii/S1569190X22001198)__
+* __[Cadmium and the DEVSsim Server](https://devssim.carleton.ca/)__
 
-**Test 2: center foragers**  
-Four center bees and two butterflies on an unwrapped grid.
+## License
 
-![Test 2: center foragers](assets/test2_center_foragers.gif)
-
-**Test 3: unwrapped boundaries**  
-West species-B band plus southeast species-A hotspot on hard edges (`wrapped: false`).
-
-![Test 3: unwrapped boundaries](assets/test3_unwrapped_boundaries.gif)
-
-**Test 4: wrapped torus**  
-Northwest species-A patch and east species-B band on a torus (`wrapped: true`).
-
-![Test 4: wrapped torus](assets/test4_wrapped_boundaries.gif)
-
-**Test 5: general multi-species reference**  
-Wrapped dual-species baseline with five bees and two butterflies.
-
-![Test 5: multi-species reference](assets/test5_multi_species.gif)
-
-**Test 6: river barrier**  
-A full river row splits the grid and constrains pollinator movement.   
-**Note:** This test is based on a previous version of the simulation based on Asymmetric Cell-DEVS
-
-![Test 6: river barrier](assets/test6_river_barrier.gif)
+__[MIT](https://choosealicense.com/licenses/mit/)__
