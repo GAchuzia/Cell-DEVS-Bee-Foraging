@@ -1279,21 +1279,17 @@
     },
     {
       "field": "plant_species",
-      "notes": "Plant species (discrete): no plant (black), species A (green), species B (blue).",
+      "notes": "Plant species (discrete): species A (light green), species B (dark green), river (blue).",
       "colors": [
-        [
-          0,
-          0,
-          0
-        ],
+        [180, 240, 180],
         [
           30,
           160,
           30
         ],
         [
-          120,
-          120,
+          0,
+          0,
           255
         ]
       ],
@@ -1301,7 +1297,8 @@
         0,
         1,
         2,
-        3
+        99,
+        100
       ]
     },
     {
