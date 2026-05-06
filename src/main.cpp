@@ -15,16 +15,6 @@
 
 using namespace cadmium;
 
-// ── BeeSimulation ─────────────────────────────────────────────────────────────
-//
-// Top-level coupled model that wires together:
-//   • NectarGrid  — Asymmetric Cell-DEVS grid of nectar patches
-//   • Bee atomics — one per initial bee position (from "agents" in JSON)
-//   • Butterfly atomics — one per initial butterfly position ("butterflies")
-//
-// Agent positions are stored at the top level of the JSON config (not inside
-// "cells") so the Cell-DEVS parser does not try to interpret them as cell IDs.
-//
 class BeeSimulation : public Coupled {
 public:
     BeeSimulation(const std::string& id, const std::string& configPath) : Coupled(id) {
@@ -41,14 +31,11 @@ public:
                 "Failed to parse JSON config '" + configPath + "': " + std::string(e.what()));
         }
 
-        // Build the asymmetric cell grid
         auto grid = std::make_shared<NectarGrid>("nectar_grid", configPath);
         this->addComponent(grid);
 
         int nextId = 1;
 
-        // ── Bee agents ────────────────────────────────────────────────────────
-        // Positions stored as top-level "agents": [[x,y], [x,y], ...]
         if (j.contains("agents") && j["agents"].is_array()) {
             auto beePositions = j["agents"].get<std::vector<std::vector<int>>>();
             for (const auto& pos : beePositions) {
@@ -59,8 +46,6 @@ public:
             std::cout << "Instantiated " << beePositions.size() << " bees from config." << std::endl;
         }
 
-        // ── Butterfly agents ──────────────────────────────────────────────────
-        // Positions stored as top-level "butterflies": [[x,y], [x,y], ...]
         if (j.contains("butterflies") && j["butterflies"].is_array()) {
             auto bfPositions = j["butterflies"].get<std::vector<std::vector<int>>>();
             for (const auto& pos : bfPositions) {
@@ -91,9 +76,7 @@ int main(int argc, char* argv[]) {
         std::cerr << "Simulation failed: " << err << std::endl;
         std::cerr << "Config:           " << configPath << std::endl;
         std::cerr << "Output CSV target: " << logPath    << std::endl;
-        if (err.find("component ID already defined") != std::string::npos) {
-            std::cerr << "Hint: duplicate component IDs — check agent IDs are unique.\n";
-        }
+        (void)err;
     };
 
     std::shared_ptr<BeeSimulation> model;

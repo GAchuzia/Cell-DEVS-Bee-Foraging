@@ -13,8 +13,6 @@
 
 #include "nectarState.hpp"
 
-// ── Pollinator message types ──────────────────────────────────────────────────
-
 struct BeeMovement {
     int bee_id;
     int x, y;
@@ -41,8 +39,6 @@ inline std::ostream& operator<<(std::ostream& os, const ButterflyMovement&) {
     return os;
 }
 
-// ── NectarCell (Asymmetric Cell-DEVS) ────────────────────────────────────────
-
 using namespace cadmium::celldevs;
 
 class NectarCell : public cadmium::celldevs::AsymmCell<nectarState, double> {
@@ -57,19 +53,15 @@ public:
                const std::shared_ptr<const cadmium::celldevs::AsymmCellConfig<nectarState, double>>& config)
         : AsymmCell<nectarState, double>(id, config)
     {
-        // Parse "(x,y)" from the asymmetric cell ID string
         if (sscanf(id.c_str(), "(%d,%d)", &cell_x, &cell_y) != 2) {
             cell_x = 0;
             cell_y = 0;
         }
         in_bee_event       = addInPort<BeeMovement>("in_bee_event");
         in_butterfly_event = addInPort<ButterflyMovement>("in_butterfly_event");
+        this->sigma = 1.0;
     }
 
-    // ── External Transition ───────────────────────────────────────────────────
-    // Triggered when a bee or butterfly agent sends a movement/consumption event.
-    // Each message is broadcast to all cells; we only process messages addressed
-    // to this cell's (x, y) coordinate.
     void externalTransition(double /*e*/) override {
         bool stateChanged = false;
 
@@ -124,14 +116,10 @@ public:
         }
 
         if (stateChanged) {
-            this->sigma = 0;   // schedule immediate internal transition
+            this->sigma = 0;
         }
     }
 
-    // ── Local Computation ─────────────────────────────────────────────────────
-    // Called during each internal transition. Computes nectar/pollen dynamics.
-    // The neighborhood map carries neighbor states via Asymmetric Cell-DEVS
-    // topology; this model's local dynamics do not depend on neighbor values.
     [[nodiscard]] nectarState localComputation(
         nectarState s,
         const std::unordered_map<std::string, NeighborData<nectarState, double>>& /*neighborhood*/)
@@ -162,7 +150,6 @@ public:
         }
         s.pollen_lvl = std::clamp(s.pollen_lvl, 0.0, max_pollen);
 
-        // Clear stale pollen type when pollen is nearly exhausted
         if (s.pollen_lvl < 0.2) {
             s.pollen_type = 0;
         }
@@ -170,7 +157,6 @@ public:
         return s;
     }
 
-    // ── Output Delay ──────────────────────────────────────────────────────────
     [[nodiscard]] double outputDelay(const nectarState& /*s*/) const override {
         return 1.0;
     }
