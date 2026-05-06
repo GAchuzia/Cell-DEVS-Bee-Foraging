@@ -13,7 +13,7 @@ source build.sh
 To run the default scenario, run
 
 ```
-bash run.sh
+bash run_main.sh
 ```
 
 Output is logged to
