@@ -3,24 +3,27 @@
 
 #include <cmath>
 #include <algorithm>
+#include <cstdio>
 #include <vector>
 #include <nlohmann/json.hpp>
 
-#include <cadmium/modeling/devs/port.hpp> 
-#include <cadmium/modeling/celldevs/grid/cell.hpp>
-#include <cadmium/modeling/celldevs/grid/config.hpp>
+#include <cadmium/modeling/devs/port.hpp>
+#include <cadmium/modeling/celldevs/asymm/cell.hpp>
+#include <cadmium/modeling/celldevs/asymm/config.hpp>
 
 #include "nectarState.hpp"
+
+// ── Pollinator message types ──────────────────────────────────────────────────
 
 struct BeeMovement {
     int bee_id;
     int x, y;
-    int action; // 0: leaving, 1: arriving, 2: staying
+    int action;              // 0: leaving, 1: arriving, 2: staying
     double consumption_request;
     int pollen_type;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const BeeMovement& m) {
+inline std::ostream& operator<<(std::ostream& os, const BeeMovement&) {
     os << "<0,0,0>";
     return os;
 }
@@ -28,53 +31,61 @@ inline std::ostream& operator<<(std::ostream& os, const BeeMovement& m) {
 struct ButterflyMovement {
     int butterfly_id;
     int x, y;
-    int action; // 0: leaving, 1: arriving, 2: staying
+    int action;              // 0: leaving, 1: arriving, 2: staying
     double consumption_request;
     int pollen_type;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ButterflyMovement& m) {
+inline std::ostream& operator<<(std::ostream& os, const ButterflyMovement&) {
     os << "<0,0,0>";
     return os;
 }
 
+// ── NectarCell (Asymmetric Cell-DEVS) ────────────────────────────────────────
+
 using namespace cadmium::celldevs;
 
-class NectarCell : public cadmium::celldevs::GridCell<nectarState, double> {
+class NectarCell : public cadmium::celldevs::AsymmCell<nectarState, double> {
 public:
-    cadmium::Port<BeeMovement> in_bee_event;
+    cadmium::Port<BeeMovement>       in_bee_event;
     cadmium::Port<ButterflyMovement> in_butterfly_event;
-    int x;
-    int y;
 
-    // Constructor
-    NectarCell(const cadmium::celldevs::coordinates& id,
-               const std::shared_ptr<const cadmium::celldevs::GridCellConfig<nectarState, double>>& config)
-    : GridCell<nectarState, double>(id, config) { 
-        x = id[0];
-        y = id[1];
-        in_bee_event = addInPort<BeeMovement>("in_bee_event");
+    int cell_x;
+    int cell_y;
+
+    NectarCell(const std::string& id,
+               const std::shared_ptr<const cadmium::celldevs::AsymmCellConfig<nectarState, double>>& config)
+        : AsymmCell<nectarState, double>(id, config)
+    {
+        // Parse "(x,y)" from the asymmetric cell ID string
+        if (sscanf(id.c_str(), "(%d,%d)", &cell_x, &cell_y) != 2) {
+            cell_x = 0;
+            cell_y = 0;
+        }
+        in_bee_event       = addInPort<BeeMovement>("in_bee_event");
         in_butterfly_event = addInPort<ButterflyMovement>("in_butterfly_event");
     }
 
-
-    // External Transition
-    //  Triggered when bee sends a consumption request
-    void externalTransition(double e) override {
+    // ── External Transition ───────────────────────────────────────────────────
+    // Triggered when a bee or butterfly agent sends a movement/consumption event.
+    // Each message is broadcast to all cells; we only process messages addressed
+    // to this cell's (x, y) coordinate.
+    void externalTransition(double /*e*/) override {
         bool stateChanged = false;
 
-        for (auto const& beeMov : in_bee_event->getBag()) {
+        for (const auto& beeMov : in_bee_event->getBag()) {
+            if (beeMov.x != cell_x || beeMov.y != cell_y) continue;
             stateChanged = true;
-           if (beeMov.x == x && beeMov.y == this->y) {
-            if (beeMov.action == 1) {
+
+            if (beeMov.action == 1) {           // arriving
                 state.bees++;
-            } else if (beeMov.action == 0) {
+            } else if (beeMov.action == 0) {    // leaving
                 state.bees = std::max(0, state.bees - 1);
             }
 
             if (beeMov.consumption_request > 0) {
                 state.nectar_lvl -= beeMov.consumption_request;
-                state.pollen_lvl += (beeMov.consumption_request * 0.12);
+                state.pollen_lvl += beeMov.consumption_request * 0.12;
             }
 
             if (beeMov.pollen_type > 0) {
@@ -86,130 +97,83 @@ public:
                 }
             }
         }
-    }
 
-        for (auto const& butterflyMov : in_butterfly_event->getBag()) {   
-            stateChanged = true;   
-            if (butterflyMov.x == x && butterflyMov.y == y) {    
-            if (butterflyMov.action == 1) {
+        for (const auto& bfMov : in_butterfly_event->getBag()) {
+            if (bfMov.x != cell_x || bfMov.y != cell_y) continue;
+            stateChanged = true;
+
+            if (bfMov.action == 1) {            // arriving
                 state.butterflies++;
-            } else if (butterflyMov.action == 0) {
+            } else if (bfMov.action == 0) {     // leaving
                 state.butterflies = std::max(0, state.butterflies - 1);
             }
 
-            if (butterflyMov.consumption_request > 0) {
-                state.nectar_lvl -= butterflyMov.consumption_request;
-                state.pollen_lvl += (butterflyMov.consumption_request * 0.28);
+            if (bfMov.consumption_request > 0) {
+                state.nectar_lvl -= bfMov.consumption_request;
+                state.pollen_lvl += bfMov.consumption_request * 0.28;
             }
 
-            if (butterflyMov.pollen_type > 0) {
-                state.pollen_type = butterflyMov.pollen_type;
-                if (butterflyMov.pollen_type == state.plant_species) {
-                    state.conspecific_pollen += butterflyMov.consumption_request * 0.7;
+            if (bfMov.pollen_type > 0) {
+                state.pollen_type = bfMov.pollen_type;
+                if (bfMov.pollen_type == state.plant_species) {
+                    state.conspecific_pollen    += bfMov.consumption_request * 0.7;
                 } else {
-                    state.heterospecific_pollen += butterflyMov.consumption_request * 1.3;
+                    state.heterospecific_pollen += bfMov.consumption_request * 1.3;
                 }
             }
         }
-    }
-
-    // process neighborhood
-        // for (const auto& msg : inputNeighborhood->getBag()) {
-        //     neighborhood.at(msg->cellId).state = msg->state;
-        // }
-
-        // // competition-inspired movement as counts (parallel to hybrid agents)
-        // double bestNeighborNectar = state.nectar_lvl;
-        // double bestNeighborResource = state.nectar_lvl + state.pollen_lvl;
-        // for (const auto& [neighborId, neighborData] : neighborhood) {
-        //     if (neighborId[0] == 0 && neighborId[1] == 0) continue;
-        //     bestNeighborNectar = std::max(bestNeighborNectar, neighborData.state->nectar_lvl);
-        //     bestNeighborResource = std::max(
-        //         bestNeighborResource,
-        //         neighborData.state->nectar_lvl + neighborData.state->pollen_lvl
-        //     );
-        // }
-
-        // if (bestNeighborResource > (state.nectar_lvl + state.pollen_lvl) * 1.5) {
-        //     int movingBees = static_cast<int>(state.bees * 0.4);
-        //     state.bees = std::max(0, state.bees - movingBees);
-        // }
-
-        // if (bestNeighborNectar > state.nectar_lvl) {
-        //     int movingButterflies = static_cast<int>(state.butterflies * 0.4);
-        //     state.butterflies = std::max(0, state.butterflies - movingButterflies);
-        // }
-
-        // compute next state
-        // auto nextState = localComputation(state, neighborhood);
-    
-        // state = nextState;
-        // state.nectar_lvl = std::clamp(state.nectar_lvl, 0.0, 100.0);
-        // state.pollen_lvl = std::clamp(state.pollen_lvl, 0.0, 50.0);
-        // state.bees = std::clamp(state.bees, 0, 50);
-        // state.butterflies = std::clamp(state.butterflies, 0, 60);
-        // state.conspecific_pollen = std::clamp(state.conspecific_pollen, 0.0, 1000.0);
-        // state.heterospecific_pollen = std::clamp(state.heterospecific_pollen, 0.0, 1000.0);
 
         if (stateChanged) {
-            this->sigma = 0;
-        } 
+            this->sigma = 0;   // schedule immediate internal transition
+        }
     }
 
-    // Local Computation
+    // ── Local Computation ─────────────────────────────────────────────────────
+    // Called during each internal transition. Computes nectar/pollen dynamics.
+    // The neighborhood map carries neighbor states via Asymmetric Cell-DEVS
+    // topology; this model's local dynamics do not depend on neighbor values.
     [[nodiscard]] nectarState localComputation(
-        nectarState state,
-        const std::unordered_map<coordinates, NeighborData<nectarState, double>>& neighborhood) 
-    const override {
+        nectarState s,
+        const std::unordered_map<std::string, NeighborData<nectarState, double>>& /*neighborhood*/)
+        const override
+    {
+        constexpr double nectar_regrowth       = 1.0;
+        constexpr double nectar_decay          = 0.05;
+        constexpr double bee_consumption       = 0.24;
+        constexpr double butterfly_consumption = 0.36;
+        constexpr double pollen_regrowth       = 1.0;
+        constexpr double pollen_decay          = 0.05;
+        constexpr double max_nectar            = 100.0;
+        constexpr double max_pollen            = 50.0;
 
-        nectarState newState = state;
+        // Nectar dynamics
+        if (s.nectar_lvl < max_nectar) {
+            s.nectar_lvl += nectar_regrowth * (1.0 + 0.01 * s.pollen_lvl);
+        }
+        s.nectar_lvl -= nectar_decay          * s.nectar_lvl;
+        s.nectar_lvl -= bee_consumption       * s.bees;
+        s.nectar_lvl -= butterfly_consumption * s.butterflies;
+        s.nectar_lvl  = std::clamp(s.nectar_lvl, 0.0, max_nectar);
 
-        double nectar_regrowth = 1.0;
-        double nectar_decay    = 0.05;
-        double nectar_consumption = 0.24;
-        double butterfly_consumption = 0.36;
+        // Pollen dynamics
+        s.pollen_lvl -= pollen_decay * s.pollen_lvl;
+        if (s.pollen_lvl < max_pollen) {
+            s.pollen_lvl += pollen_regrowth * 0.1;
+        }
+        s.pollen_lvl = std::clamp(s.pollen_lvl, 0.0, max_pollen);
 
-        double pollen_regrowth = 1.0;
-        double pollen_decay    = 0.05;
-
-        double max_nectar = 100.0;
-        double max_pollen = 50.0;
-        int    max_bees   = 50;
-        
-        double nectar_regen_boost = 0.0;
-       
-        if (state.nectar_lvl < max_nectar) {
-            newState.nectar_lvl += nectar_regrowth * (1.0 + 0.01 * state.pollen_lvl) + nectar_regen_boost;
+        // Clear stale pollen type when pollen is nearly exhausted
+        if (s.pollen_lvl < 0.2) {
+            s.pollen_type = 0;
         }
 
-        newState.nectar_lvl -= nectar_decay * state.nectar_lvl;
-        newState.nectar_lvl -= nectar_consumption * state.bees;
-        newState.nectar_lvl -= butterfly_consumption * state.butterflies;
-
-        newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
-
-        newState.pollen_lvl -= pollen_decay * state.pollen_lvl;
-
-        if (state.pollen_lvl < max_pollen) {
-            newState.pollen_lvl += pollen_regrowth * 0.1;
-        }
-
-        newState.nectar_lvl = std::clamp(newState.nectar_lvl, 0.0, max_nectar);
-        newState.pollen_lvl = std::clamp(newState.pollen_lvl, 0.0, max_pollen);
-
-        // Light pollen type decay to emulate washout after visits.
-        if (newState.pollen_lvl < 0.2) {
-            newState.pollen_type = 0;
-        }
-        return newState;
+        return s;
     }
 
-    // Output delay
-    [[nodiscard]] double outputDelay(const nectarState& state) const override {
+    // ── Output Delay ──────────────────────────────────────────────────────────
+    [[nodiscard]] double outputDelay(const nectarState& /*s*/) const override {
         return 1.0;
     }
-
-   
 };
 
-#endif
+#endif // NECTAR_CELL

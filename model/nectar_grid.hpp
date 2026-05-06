@@ -2,61 +2,62 @@
 #define NECTAR_GRID
 
 #include <iostream>
-#include <fstream>
+#include <memory>
 
-#include <cadmium/modeling/devs/port.hpp> 
-#include <cadmium/modeling/celldevs/grid/coupled.hpp>
+#include <cadmium/modeling/devs/port.hpp>
+#include <cadmium/modeling/celldevs/asymm/coupled.hpp>
+
 #include "cells/nectar_cell.hpp"
 
 using namespace cadmium;
 using namespace cadmium::celldevs;
 
-class NectarGrid : public GridCellDEVSCoupled<nectarState, double> {
+// ── NectarGrid (Asymmetric Cell-DEVS coupled model) ──────────────────────────
+//
+// Inherits from AsymmCellDEVSCoupled, which reads the per-cell topology from
+// the JSON config (explicit neighborhood maps, no "scenario" block required).
+// External ports are added before buildModel() so the coupled model exposes
+// them; EIC connections are wired afterward by iterating the components map.
+//
+class NectarGrid : public cadmium::celldevs::AsymmCellDEVSCoupled<nectarState, double> {
 public:
-    cadmium::Port<BeeMovement> in_bee_move;
+    cadmium::Port<BeeMovement>       in_bee_move;
     cadmium::Port<ButterflyMovement> in_butterfly_move;
-    
-    NectarGrid(std::string const &id, std::string const &configPath) 
-        : GridCellDEVSCoupled<nectarState, double>(id, addNectarCell, configPath) {
 
-        in_bee_move = addInPort<BeeMovement>("in_bee_move");
+    NectarGrid(const std::string& id, const std::string& configPath)
+        : AsymmCellDEVSCoupled<nectarState, double>(id, addNectarCell, configPath)
+    {
+        // Add external input ports before buildModel() so they are registered
+        in_bee_move       = addInPort<BeeMovement>("in_bee_move");
         in_butterfly_move = addInPort<ButterflyMovement>("in_butterfly_move");
 
-        std::ifstream file(configPath);
-        if (!file.is_open()) {
-            throw std::runtime_error("Could not open config file: " + configPath);
-        }
-        nlohmann::json j;
-        file >> j;
+        // Build the asymmetric cell topology from the JSON config
+        this->buildModel();
 
-        this->GridCellDEVSCoupled<nectarState, double>::buildModel();
-
-        auto grid_shape = j["scenario"]["shape"].get<std::vector<int>>();
-
-        // Route the grid's input port to each individual cell's input port
-        for (int i = 0; i < grid_shape[0]; ++i) {
-            for (int j_idx = 0; j_idx < grid_shape[1]; ++j_idx) {
-                cadmium::celldevs::coordinates coord = {i, j_idx};
-                std::string cellIdStr = GridCellDEVSCoupled<nectarState, double>::cellId(coord);
-
-                try {
-                    this->addDynamicEIC("in_bee_move", cellIdStr, "in_bee_event");
-                    this->addDynamicEIC("in_butterfly_move", cellIdStr, "in_butterfly_event");
-                } catch (const cadmium::CadmiumModelException& e) {
-                    std::cout << "Failed to link cell: " << cellIdStr << " - " << e.what() << std::endl;
-                }
+        // Wire the grid-level ports to every individual cell's input ports.
+        // After buildModel(), this->components maps each cell ID string to its
+        // shared_ptr<Component>; we cast each to NectarCell to access its ports.
+        int connected = 0;
+        for (auto& [cellId, component] : this->components) {
+            auto cell = std::dynamic_pointer_cast<NectarCell>(component);
+            if (cell) {
+                this->addEIC(in_bee_move,       cell->in_bee_event);
+                this->addEIC(in_butterfly_move, cell->in_butterfly_event);
+                ++connected;
             }
         }
-        std::cout << "Grid initialized with shape: " << grid_shape[0] << "x" << grid_shape[1] << std::endl;    
+        std::cout << "NectarGrid: " << connected << " cells connected via EIC." << std::endl;
     }
 
 private:
-    static std::shared_ptr<GridCell<nectarState, double>> addNectarCell(
-        const coordinates &cellId, 
-        const std::shared_ptr<const GridCellConfig<nectarState, double>>& cellConfig) 
+    // Factory function required by AsymmCellDEVSCoupled.
+    // Returns a NectarCell for every cell ID found in the JSON config.
+    static std::shared_ptr<AsymmCell<nectarState, double>> addNectarCell(
+        const std::string& cellId,
+        const std::shared_ptr<const AsymmCellConfig<nectarState, double>>& cellConfig)
     {
         return std::make_shared<NectarCell>(cellId, cellConfig);
     }
 };
 
-#endif
+#endif // NECTAR_GRID
