@@ -37,7 +37,7 @@ simulation_results/test<N>_grid_log.csv
 The scripts are:
 
 * `build.sh`: Compiles the project using CMake.
-* `run.sh`: Runs the default nectar visualization scenario.
+* `run_main.sh`: Runs the default nectar visualization scenario.
 * `run_tests.sh`: Builds and runs all six test scenarios.
 * `test1.sh` – `test6.sh`: Run individual test scenarios.
 * `generate_asymm_configs.py`: Generates asymmetric Cell-DEVS JSON configs from scenario definitions.
